@@ -17,14 +17,16 @@ const VitaminDReminder = () => {
   const navigate = useNavigate();
   const [assistantOpen, setAssistantOpen] = useState(true);
   const [showReminder, setShowReminder] = useState(false);
-  const [timerMinutes, setTimerMinutes] = useState(15);
+  const [timerHours, setTimerHours] = useState(1);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerAlert, setTimerAlert] = useState(false);
+  const [showTimerCard, setShowTimerCard] = useState(false);
 
   // Handle reminder click
   const handleReminderClick = () => {
     setShowReminder(true);
+    setShowTimerCard(true);
     // Auto-hide reminder after 3 seconds
     setTimeout(() => {
       setShowReminder(false);
@@ -34,11 +36,11 @@ const VitaminDReminder = () => {
   // Timer related functions
   const startTimer = () => {
     if (timeLeft === 0) {
-      setTimeLeft(timerMinutes * 60);
+      setTimeLeft(timerHours * 3600); // Convert hours to seconds
     }
     setIsTimerRunning(true);
     setTimerAlert(false);
-    console.log(`Timer started: ${timeLeft || timerMinutes * 60} seconds`);
+    console.log(`Timer started: ${timeLeft || timerHours * 3600} seconds`);
   };
 
   const pauseTimer = () => {
@@ -92,13 +94,13 @@ const VitaminDReminder = () => {
     const timerState = {
       timeLeft,
       isTimerRunning,
-      timerMinutes,
+      timerHours,
       timerAlert,
       startTime: isTimerRunning ? Date.now() : null,
       lastSaved: Date.now()
     };
     localStorage.setItem('vitaminDTimer', JSON.stringify(timerState));
-  }, [timeLeft, isTimerRunning, timerMinutes, timerAlert]);
+  }, [timeLeft, isTimerRunning, timerHours, timerAlert]);
 
   // Restore timer state from localStorage on component mount
   useEffect(() => {
@@ -106,7 +108,7 @@ const VitaminDReminder = () => {
     if (savedTimer) {
       try {
         const timerState = JSON.parse(savedTimer);
-        setTimerMinutes(timerState.timerMinutes || 15);
+        setTimerHours(timerState.timerHours || 1);
         setTimerAlert(timerState.timerAlert || false);
         
         if (timerState.isTimerRunning && timerState.startTime) {
@@ -138,7 +140,7 @@ const VitaminDReminder = () => {
         setTimeLeft(0);
         setIsTimerRunning(false);
         setTimerAlert(false);
-        setTimerMinutes(15);
+        setTimerHours(1);
       }
     }
   }, []);
@@ -149,7 +151,7 @@ const VitaminDReminder = () => {
       const timerState = {
         timeLeft,
         isTimerRunning,
-        timerMinutes,
+        timerHours,
         timerAlert,
         startTime: isTimerRunning ? Date.now() : null,
         lastSaved: Date.now()
@@ -163,7 +165,7 @@ const VitaminDReminder = () => {
         const timerState = {
           timeLeft,
           isTimerRunning,
-          timerMinutes,
+          timerHours,
           timerAlert,
           startTime: isTimerRunning ? Date.now() : null,
           lastSaved: Date.now()
@@ -183,19 +185,23 @@ const VitaminDReminder = () => {
       const timerState = {
         timeLeft,
         isTimerRunning,
-        timerMinutes,
+        timerHours,
         timerAlert,
         startTime: isTimerRunning ? Date.now() : null,
         lastSaved: Date.now()
       };
       localStorage.setItem('vitaminDTimer', JSON.stringify(timerState));
     };
-  }, [timeLeft, isTimerRunning, timerMinutes, timerAlert]);
+    }, [timeLeft, isTimerRunning, timerHours, timerAlert]);
 
   // Format time display
   const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
+    if (hours > 0) {
+      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
@@ -319,8 +325,9 @@ const VitaminDReminder = () => {
           )}
         </div>
 
-        {/* Timer Section */}
-        <div className="bg-white/20 backdrop-blur-md rounded-3xl shadow-xl border border-white/30 p-8">
+        {/* Timer Section - Only show after clicking reminder */}
+        {showTimerCard && (
+          <div className="bg-white/20 backdrop-blur-md rounded-3xl shadow-xl border border-white/30 p-8 fade-in">
           <div className="flex items-center gap-3 mb-6">
             <Timer className="text-orange-600" size={24} />
             <h2 className="text-2xl font-bold text-slate-800">Outdoor Time Timer</h2>
@@ -361,27 +368,27 @@ const VitaminDReminder = () => {
             {/* Timer Slider */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Set reminder time (minutes)
+                Set reminder time (hours)
               </label>
               <div className="bg-white rounded-lg p-3 border border-slate-200">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">5 min</span>
+                  <span className="text-sm text-slate-600">1 hr</span>
                   <span className="text-lg font-semibold text-yellow-600">
-                    {timerMinutes} min
+                    {timerHours} {timerHours === 1 ? 'hr' : 'hrs'}
                   </span>
-                  <span className="text-sm text-slate-600">60 min</span>
+                  <span className="text-sm text-slate-600">10 hrs</span>
                 </div>
                 <input
                   type="range"
-                  min="5"
-                  max="60"
-                  step="5"
-                  value={timerMinutes}
-                  onChange={(e) => setTimerMinutes(parseInt(e.target.value))}
+                  min="1"
+                  max="10"
+                  step="1"
+                  value={timerHours}
+                  onChange={(e) => setTimerHours(parseInt(e.target.value))}
                   disabled={isTimerRunning}
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer timer-slider"
                   style={{
-                    background: `linear-gradient(to right, #eab308 0%, #eab308 ${((timerMinutes - 5) / 55) * 100}%, #e2e8f0 ${((timerMinutes - 5) / 55) * 100}%, #e2e8f0 100%)`
+                    background: `linear-gradient(to right, #eab308 0%, #eab308 ${((timerHours - 1) / 9) * 100}%, #e2e8f0 ${((timerHours - 1) / 9) * 100}%, #e2e8f0 100%)`
                   }}
                 />
               </div>
@@ -400,6 +407,7 @@ const VitaminDReminder = () => {
             )}
           </div>
         </div>
+        )}
 
 
       </div>
