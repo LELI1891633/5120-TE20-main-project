@@ -186,7 +186,7 @@ const EyeHealthAnalysis = () => {
         physical_activity_hours: getPhysicalActivityHours(formData.physicalActivity)
       };
 
-      const response = await fetch('http://127.0.0.1:8000/eye-health/analyze', {
+      const response = await fetch('http://127.0.0.1:8000/api/eye-health/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
