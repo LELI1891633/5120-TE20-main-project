@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Eye, 
@@ -21,7 +21,10 @@ const EyeHealthAnalysis = () => {
   const [formData, setFormData] = useState({
     ageGroup: "",
     sex: "",
-    screenTime: 8
+    screenTime: 8,
+    physicalActivity: "",
+    state: "NSW",
+    remotenessArea: "Major Cities"
   });
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,10 +35,40 @@ const EyeHealthAnalysis = () => {
   const [timerAlert, setTimerAlert] = useState(false);
 
   const ageGroups = [
-    "0–14", "15–24", "25–34", "35–44", "45–54", "55–64", "65–74", "75–84", "85+"
+    "15–24", "25–34", "35–44", "45–54", "55–64"
   ];
 
-  const sexes = ["Male", "Female", "Persons"];
+  const genders = ["Male", "Female", "Prefer not to say"];
+
+  const physicalActivityLevels = [
+    { value: "None", label: "None: 0 hrs" },
+    { value: "Low", label: "Low: 1–3 hrs" },
+    { value: "Moderate", label: "Moderate: 4–6 hrs" },
+    { value: "High", label: "High: 7–10 hrs" }
+  ];
+
+  
+  const allRecommendations = [
+    "Follow the 20-20-20 rule: Look at something 20 feet away for 20 seconds every 20 minutes",
+    "Adjust monitor brightness to match your surroundings",
+    "Keep your monitor 50-70 cm away from your eyes",
+    "Schedule regular eye examinations",
+    "Use blue light filtering glasses or screen filters",
+    "Ensure adequate natural lighting in your workspace",
+    "Practice regular eye relaxation exercises",
+    "Maintain a balanced diet rich in eye-healthy nutrients (vitamins A, C, E, zinc, omega-3)"
+  ];
+
+
+  const getRandomRecommendations = () => {
+    const shuffled = [...allRecommendations].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3);
+  };
+
+
+  const randomRecommendations = useMemo(() => {
+    return getRandomRecommendations();
+  }, [analysisResult]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -46,13 +79,11 @@ const EyeHealthAnalysis = () => {
 
   const handleReminderClick = () => {
     setShowReminder(true);
-    // Auto-hide reminder after 3 seconds
     setTimeout(() => {
       setShowReminder(false);
     }, 3000);
   };
 
-  // Timer related functions
   const startTimer = () => {
     if (timeLeft === 0) {
       setTimeLeft(timerMinutes * 60);
@@ -71,7 +102,6 @@ const EyeHealthAnalysis = () => {
     setTimerAlert(false);
   };
 
-  // Countdown effect
   React.useEffect(() => {
     let interval = null;
     if (isTimerRunning && timeLeft > 0) {
@@ -81,7 +111,6 @@ const EyeHealthAnalysis = () => {
     } else if (timeLeft === 0 && isTimerRunning) {
       setIsTimerRunning(false);
       setTimerAlert(true);
-      // Play notification sound (if browser supports)
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('Time\'s up!', {
           body: 'Time to get up and move around!',
@@ -92,14 +121,12 @@ const EyeHealthAnalysis = () => {
     return () => clearInterval(interval);
   }, [isTimerRunning, timeLeft]);
 
-  // Request notification permission
   React.useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
   }, []);
 
-  // Save timer state to localStorage
   React.useEffect(() => {
     const timerState = {
       timeLeft,
@@ -111,7 +138,6 @@ const EyeHealthAnalysis = () => {
     localStorage.setItem('eyeHealthTimer', JSON.stringify(timerState));
   }, [timeLeft, isTimerRunning, timerMinutes, timerAlert]);
 
-  // Restore timer state from localStorage
   React.useEffect(() => {
     const savedTimer = localStorage.getItem('eyeHealthTimer');
     if (savedTimer) {
@@ -121,7 +147,6 @@ const EyeHealthAnalysis = () => {
         setTimerAlert(timerState.timerAlert || false);
         
         if (timerState.isTimerRunning && timerState.startTime) {
-          // Calculate elapsed time
           const elapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
           const remaining = Math.max(0, timerState.timeLeft - elapsed);
           
@@ -129,7 +154,6 @@ const EyeHealthAnalysis = () => {
             setTimeLeft(remaining);
             setIsTimerRunning(true);
           } else {
-            // Time's up, show alert
             setTimeLeft(0);
             setIsTimerRunning(false);
             setTimerAlert(true);
@@ -144,7 +168,6 @@ const EyeHealthAnalysis = () => {
     }
   }, []);
 
-  // Format time display
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -155,26 +178,52 @@ const EyeHealthAnalysis = () => {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:3001/api/eye-health/analyze', {
+      // Convert frontend data to FastAPI format
+      const requestData = {
+        age: parseInt(formData.ageGroup.split('–')[0]) + 5, // Convert age group to approximate age
+        gender: formData.sex,
+        screen_time_hours: formData.screenTime,
+        physical_activity_hours: getPhysicalActivityHours(formData.physicalActivity)
+      };
+
+      const response = await fetch('http://127.0.0.1:8000/eye-health/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(requestData),
       });
 
       const result = await response.json();
-      if (result.success) {
-        setAnalysisResult(result.data);
-        setCurrentStep(2);
-      } else {
-        throw new Error(result.error || 'Analysis failed');
-      }
+      
+      // Convert FastAPI response to frontend expected format
+      const convertedResult = {
+        eye_risk: (result.risk_level + 1) * 25, // Convert 0,1,2 to 25,50,75
+        risk_level: result.risk_level_name,
+        confidence: result.confidence > 0.8 ? 'High' : result.confidence > 0.6 ? 'Medium' : 'Low',
+        recommendations: result.recommendations,
+        screen_time_impact: `Your screen time of ${requestData.screen_time_hours} hours/day is ${result.risk_level_name.toLowerCase()} risk`
+      };
+
+      setAnalysisResult(convertedResult);
+      setCurrentStep(2);
+      
     } catch (error) {
       console.error('Analysis error:', error);
       alert('Analysis failed, please try again later');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Helper function to convert physical activity level to hours
+  const getPhysicalActivityHours = (activity) => {
+    switch (activity) {
+      case 'None': return 0;
+      case 'Low': return 2;
+      case 'Moderate': return 4;
+      case 'High': return 6;
+      default: return 2;
     }
   };
 
@@ -204,22 +253,35 @@ const EyeHealthAnalysis = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Sex</label>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Gender</label>
           <select
             value={formData.sex}
             onChange={(e) => handleInputChange('sex', e.target.value)}
             className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">Select sex</option>
-            {sexes.map(sex => (
-              <option key={sex} value={sex}>{sex}</option>
+            <option value="">Select gender</option>
+            {genders.map(gender => (
+              <option key={gender} value={gender}>{gender}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Physical Activity (hours per day)</label>
+          <select
+            value={formData.physicalActivity}
+            onChange={(e) => handleInputChange('physicalActivity', e.target.value)}
+            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Select activity level</option>
+            {physicalActivityLevels.map(level => (
+              <option key={level.value} value={level.value}>{level.label}</option>
             ))}
           </select>
         </div>
 
       </div>
 
-      {/* Screen Time Slider */}
       <div className="mt-6">
         <label className="block text-sm font-medium text-slate-700 mb-3">
           <Monitor className="inline w-4 h-4 mr-2" />
@@ -335,7 +397,6 @@ const EyeHealthAnalysis = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Screen Time Impact Analysis */}
             <div>
               <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
                 <Monitor className="text-purple-600" size={20} />
@@ -360,11 +421,11 @@ const EyeHealthAnalysis = () => {
                   <div>
                     <h4 className="font-medium text-slate-800 mb-2">Risk Assessment</h4>
                     <div className="flex items-center gap-2">
-                      {formData.screenTime <= 6 ? (
+                      {analysisResult.risk_level === 'Low' ? (
                         <span className="text-green-600 text-sm font-medium">✅ Low Risk</span>
-                      ) : formData.screenTime <= 8 ? (
+                      ) : analysisResult.risk_level === 'Medium' ? (
                         <span className="text-yellow-600 text-sm font-medium">⚠️ Moderate Risk</span>
-                      ) : formData.screenTime <= 10 ? (
+                      ) : analysisResult.risk_level === 'High' ? (
                         <span className="text-orange-600 text-sm font-medium">🔶 High Risk</span>
                       ) : (
                         <span className="text-red-600 text-sm font-medium">🚨 Critical Risk</span>
@@ -389,17 +450,7 @@ const EyeHealthAnalysis = () => {
               </h3>
               <div className="bg-blue-50 rounded-lg p-4">
                 <ul className="space-y-2">
-                  {analysisResult.recommendations?.map((rec, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <CheckCircle className="text-blue-600 mt-0.5 flex-shrink-0" size={16} />
-                      <span className="text-slate-700">{rec}</span>
-                    </li>
-                  )) || [
-                    "Follow the 20-20-20 rule: Look at something 20 feet away for 20 seconds every 20 minutes",
-                    "Adjust monitor brightness to match your surroundings",
-                    "Keep your monitor 50-70 cm away from your eyes",
-                    "Schedule regular eye examinations"
-                  ].map((rec, index) => (
+                  {randomRecommendations.map((rec, index) => (
                     <li key={index} className="flex items-start gap-2">
                       <CheckCircle className="text-blue-600 mt-0.5 flex-shrink-0" size={16} />
                       <span className="text-slate-700">{rec}</span>
@@ -432,7 +483,6 @@ const EyeHealthAnalysis = () => {
               </div>
             </div>
 
-            {/* Reminder Section */}
             <div>
               <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
                 <Clock className="text-orange-600" size={20} />
@@ -452,7 +502,6 @@ const EyeHealthAnalysis = () => {
                   </div>
                 </div>
                 
-                {/* Reminder Message */}
                 {showReminder && (
                   <div className="mt-4 p-3 bg-green-100 border border-green-200 rounded-lg fade-in">
                     <div className="flex items-center gap-2">
@@ -466,14 +515,12 @@ const EyeHealthAnalysis = () => {
               </div>
             </div>
 
-            {/* Timer Section */}
             <div>
               <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
                 <Activity className="text-purple-600" size={20} />
                 Break Timer
               </h3>
               <div className="bg-purple-50 rounded-lg p-4">
-                {/* Timer Display */}
                 <div className="text-center mb-4">
                   <div className="text-4xl font-mono font-bold text-purple-600 mb-2">
                     {formatTime(timeLeft)}
@@ -483,7 +530,6 @@ const EyeHealthAnalysis = () => {
                   </p>
                 </div>
 
-                {/* Timer Slider */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Set reminder time (minutes)
@@ -512,7 +558,6 @@ const EyeHealthAnalysis = () => {
                   </div>
                 </div>
 
-                {/* Timer Controls */}
                 <div className="flex gap-2 justify-center">
                   {!isTimerRunning ? (
                     <button
@@ -541,7 +586,6 @@ const EyeHealthAnalysis = () => {
                   </button>
                 </div>
 
-                {/* Timer Alert */}
                 {timerAlert && (
                   <div className="mt-4 p-4 bg-red-100 border border-red-200 rounded-lg fade-in">
                     <div className="flex items-center gap-2">
@@ -566,7 +610,7 @@ const EyeHealthAnalysis = () => {
     </div>
   );
 
-  const isStep1Valid = formData.ageGroup && formData.sex && formData.screenTime !== null;
+  const isStep1Valid = formData.ageGroup && formData.sex && formData.physicalActivity && formData.screenTime !== null;
 
   return (
     <>
@@ -618,12 +662,10 @@ const EyeHealthAnalysis = () => {
         }
       `}</style>
     <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-sky-50 py-6 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 right-1/3 w-80 h-80 bg-gradient-to-br from-orange-200/30 to-pink-200/30 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-gradient-to-br from-sky-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
       </div>
-      {/* Header */}
       <div className="max-w-4xl mx-auto mb-8 relative z-10">
         <div className="flex items-center gap-4 mb-6">
           <button
@@ -641,7 +683,6 @@ const EyeHealthAnalysis = () => {
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="max-w-4xl mx-auto mb-8">
         <div className="flex items-center justify-center space-x-4">
           {[1, 2].map((step) => (
@@ -669,14 +710,12 @@ const EyeHealthAnalysis = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-4xl mx-auto relative z-10">
         <div className="bg-white/20 backdrop-blur-md rounded-3xl shadow-xl border border-white/30 p-8 hover:bg-white/30 transition-all duration-300">
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep3()}
         </div>
 
-        {/* Navigation Buttons */}
         <div className="flex justify-between mt-8">
           <button
             onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
@@ -693,7 +732,10 @@ const EyeHealthAnalysis = () => {
                 setFormData({
                   ageGroup: "",
                   sex: "",
-                  screenTime: 8
+                  screenTime: 8,
+                  physicalActivity: "",
+                  state: "NSW",
+                  remotenessArea: "Major Cities"
                 });
                 setAnalysisResult(null);
               }}
@@ -727,7 +769,6 @@ const EyeHealthAnalysis = () => {
         )}
       </div>
 
-      {/* Animated Assistant */}
       <AnimatedAssistant
         open={assistantOpen}
         name="Eye Health Assistant"
