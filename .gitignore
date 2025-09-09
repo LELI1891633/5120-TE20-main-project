@@ -40,3 +40,8 @@ Thumbs.db
 # Other
 # -------------------
 *.log
+
+# Virtual environments
+venv/
+backend/venv/
+env/
