@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Home, Heart, Info } from "lucide-react";
+import { Menu, X, Home, Heart, Info, Flower2 } from "lucide-react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,6 +11,7 @@ const Navbar = () => {
     { to: "/", label: "Home", icon: Home },
     { to: "/healthy", label: "Healthy Space", icon: Heart },
     { to: "/health-info", label: "Health Info", icon: Info },
+    { to: "/stress-buster", label: "Stress-buster", icon: Flower2 },
   ];
 
   return (

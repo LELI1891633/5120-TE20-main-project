@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { AnimatedAssistant } from "../components/AnimatedAssistant";
 
+const LS_KEY = "vitamin-d.settings.v1";
+
 const VitaminDReminder = () => {
   const navigate = useNavigate();
   const [assistantOpen, setAssistantOpen] = useState(true);
@@ -22,6 +24,79 @@ const VitaminDReminder = () => {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerAlert, setTimerAlert] = useState(false);
   const [showTimerCard, setShowTimerCard] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load settings from localStorage
+  useEffect(() => {
+    try {
+      if (typeof Storage === "undefined") {
+        console.error('localStorage is not available');
+        return;
+      }
+      
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        setTimerHours(s.timerHours ?? 1);
+        setTimerAlert(!!s.timerAlert);
+        setShowTimerCard(!!s.showTimerCard);
+        
+        // Handle timer state restoration
+        if (s.isTimerRunning && s.startTime) {
+          // Calculate elapsed time since the timer was started
+          const elapsed = Math.floor((Date.now() - s.startTime) / 1000);
+          const remaining = Math.max(0, (s.timeLeft ?? 0) - elapsed);
+          
+          if (remaining > 0) {
+            // Timer is still running, restore the remaining time
+            setTimeLeft(remaining);
+            setIsTimerRunning(true);
+            console.log(`Timer restored: ${remaining} seconds remaining`);
+          } else {
+            // Timer has completed while away
+            setTimeLeft(0);
+            setIsTimerRunning(false);
+            setTimerAlert(true);
+            console.log('Timer completed while away');
+          }
+        } else {
+          // Timer was not running, just restore the time left
+          setTimeLeft(s.timeLeft ?? 0);
+          setIsTimerRunning(false);
+          console.log('Timer state restored (not running)');
+        }
+      }
+      
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Error loading Vitamin D settings:', error);
+      setIsInitialized(true);
+    }
+  }, []);
+
+  // Save settings to localStorage
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    try {
+      if (typeof Storage === "undefined") {
+        console.error('localStorage is not available for saving');
+        return;
+      }
+      
+      const s = { 
+        timerHours, 
+        timeLeft, 
+        isTimerRunning, 
+        timerAlert, 
+        showTimerCard,
+        startTime: isTimerRunning ? Date.now() : null
+      };
+      localStorage.setItem(LS_KEY, JSON.stringify(s));
+    } catch (error) {
+      console.error('Error saving Vitamin D settings:', error);
+    }
+  }, [timerHours, timeLeft, isTimerRunning, timerAlert, showTimerCard, isInitialized]);
 
   // Handle reminder click
   const handleReminderClick = () => {
@@ -89,110 +164,8 @@ const VitaminDReminder = () => {
     }
   }, []);
 
-  // Save timer state to localStorage whenever it changes
-  useEffect(() => {
-    const timerState = {
-      timeLeft,
-      isTimerRunning,
-      timerHours,
-      timerAlert,
-      startTime: isTimerRunning ? Date.now() : null,
-      lastSaved: Date.now()
-    };
-    localStorage.setItem('vitaminDTimer', JSON.stringify(timerState));
-  }, [timeLeft, isTimerRunning, timerHours, timerAlert]);
-
-  // Restore timer state from localStorage on component mount
-  useEffect(() => {
-    const savedTimer = localStorage.getItem('vitaminDTimer');
-    if (savedTimer) {
-      try {
-        const timerState = JSON.parse(savedTimer);
-        setTimerHours(timerState.timerHours || 1);
-        setTimerAlert(timerState.timerAlert || false);
-        
-        if (timerState.isTimerRunning && timerState.startTime) {
-          // Calculate elapsed time since the timer was started
-          const elapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
-          const remaining = Math.max(0, timerState.timeLeft - elapsed);
-          
-          if (remaining > 0) {
-            // Timer is still running, restore the remaining time
-            setTimeLeft(remaining);
-            setIsTimerRunning(true);
-            console.log(`Timer restored: ${remaining} seconds remaining`);
-          } else {
-            // Timer has completed while away
-            setTimeLeft(0);
-            setIsTimerRunning(false);
-            setTimerAlert(true);
-            console.log('Timer completed while away');
-          }
-        } else {
-          // Timer was not running, just restore the time left
-          setTimeLeft(timerState.timeLeft || 0);
-          setIsTimerRunning(false);
-          console.log('Timer state restored (not running)');
-        }
-      } catch (error) {
-        console.error('Error loading timer state:', error);
-        // Reset to default values if there's an error
-        setTimeLeft(0);
-        setIsTimerRunning(false);
-        setTimerAlert(false);
-        setTimerHours(1);
-      }
-    }
-  }, []);
 
   // Save state before page unload and component unmount
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      const timerState = {
-        timeLeft,
-        isTimerRunning,
-        timerHours,
-        timerAlert,
-        startTime: isTimerRunning ? Date.now() : null,
-        lastSaved: Date.now()
-      };
-      localStorage.setItem('vitaminDTimer', JSON.stringify(timerState));
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Page is being hidden, save state
-        const timerState = {
-          timeLeft,
-          isTimerRunning,
-          timerHours,
-          timerAlert,
-          startTime: isTimerRunning ? Date.now() : null,
-          lastSaved: Date.now()
-        };
-        localStorage.setItem('vitaminDTimer', JSON.stringify(timerState));
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      
-      // Save state on component unmount
-      const timerState = {
-        timeLeft,
-        isTimerRunning,
-        timerHours,
-        timerAlert,
-        startTime: isTimerRunning ? Date.now() : null,
-        lastSaved: Date.now()
-      };
-      localStorage.setItem('vitaminDTimer', JSON.stringify(timerState));
-    };
-    }, [timeLeft, isTimerRunning, timerHours, timerAlert]);
 
   // Format time display
   const formatTime = (seconds) => {
@@ -284,6 +257,29 @@ const VitaminDReminder = () => {
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Get natural Vitamin D with smart reminders to step outside during your workday
           </p>
+        </div>
+      </div>
+
+      {/* Status Indicator */}
+      <div className="max-w-4xl mx-auto mb-6">
+        <div className="bg-yellow-50 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${isTimerRunning ? 'bg-green-500' : 'bg-gray-300'}`} />
+            <span className="font-medium">
+              {isTimerRunning ? 'Timer Active' : 'Timer Paused'}
+            </span>
+            {timeLeft > 0 && (
+              <span className="text-sm text-slate-600">
+                Time remaining: {formatTime(timeLeft)}
+              </span>
+            )}
+          </div>
+          {isTimerRunning && (
+            <div className="mt-2 text-xs text-slate-500">
+              Timer set for {timerHours} hour{timerHours !== 1 ? 's' : ''} • 
+              {timerAlert ? ' Alert triggered!' : ' Running normally'}
+            </div>
+          )}
         </div>
       </div>
 

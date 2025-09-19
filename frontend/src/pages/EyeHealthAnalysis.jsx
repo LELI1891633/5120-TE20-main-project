@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { API_BASE, request } from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { 
   Eye, 
@@ -186,15 +187,10 @@ const EyeHealthAnalysis = () => {
         physical_activity_hours: getPhysicalActivityHours(formData.physicalActivity)
       };
 
-      const response = await fetch('http://127.0.0.1:8000/api/eye-health/analyze', {
+      const result = await request('/api/eye-health/analyze', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
+        body: JSON.stringify(requestData)
       });
-
-      const result = await response.json();
       
       // Convert FastAPI response to frontend expected format
       const convertedResult = {
@@ -307,27 +303,6 @@ const EyeHealthAnalysis = () => {
               background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(formData.screenTime / 16) * 100}%, #e2e8f0 ${(formData.screenTime / 16) * 100}%, #e2e8f0 100%)`
             }}
           />
-          <style jsx>{`
-            .slider::-webkit-slider-thumb {
-              appearance: none;
-              height: 20px;
-              width: 20px;
-              border-radius: 50%;
-              background: #3b82f6;
-              cursor: pointer;
-              border: 2px solid #ffffff;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            }
-            .slider::-moz-range-thumb {
-              height: 20px;
-              width: 20px;
-              border-radius: 50%;
-              background: #3b82f6;
-              cursor: pointer;
-              border: 2px solid #ffffff;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            }
-          `}</style>
           <div className="flex justify-between text-xs text-slate-500 mt-1">
             <span>Light use</span>
             <span>Moderate</span>
@@ -614,53 +589,6 @@ const EyeHealthAnalysis = () => {
 
   return (
     <>
-      <style jsx>{`
-        .fade-in {
-          animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .timer-slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: #8b5cf6;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .timer-slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: #8b5cf6;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .timer-slider:disabled::-webkit-slider-thumb {
-          background: #9ca3af;
-          cursor: not-allowed;
-        }
-
-        .timer-slider:disabled::-moz-range-thumb {
-          background: #9ca3af;
-          cursor: not-allowed;
-        }
-      `}</style>
     <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-sky-50 py-6 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 right-1/3 w-80 h-80 bg-gradient-to-br from-orange-200/30 to-pink-200/30 rounded-full blur-3xl"></div>

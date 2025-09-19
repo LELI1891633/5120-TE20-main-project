@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* RiskIndicator component styles migrated from RiskIndicator.css */
+  .risk-indicator {
+    @apply bg-white rounded-xl p-5 shadow-lg border border-gray-200;
+  }
+
+  .risk-header {
+    @apply flex justify-between items-center mb-4;
+  }
+
+  .risk-header h4 {
+    @apply text-gray-800 m-0 text-lg font-semibold;
+  }
+
+  .risk-badge {
+    @apply text-xs px-2 py-1 rounded-xl font-bold uppercase;
+  }
+
+  .risk-badge.low {
+    @apply bg-green-100 text-green-600;
+  }
+
+  .risk-badge.medium {
+    @apply bg-orange-100 text-orange-600;
+  }
+
+  .risk-badge.high {
+    @apply bg-red-100 text-red-600;
+  }
+
+  .risk-score {
+    @apply flex items-center gap-4 mb-4;
+  }
+
+  .score-bar {
+    @apply flex-1 h-2 bg-gray-200 rounded overflow-hidden;
+  }
+
+  .score-fill {
+    @apply h-full rounded transition-all duration-300;
+  }
+
+  .score-text {
+    @apply font-bold text-gray-800 min-w-10 text-right;
+  }
+
+  .risk-description {
+    @apply text-gray-600 text-sm leading-relaxed m-0;
+  }
+
+  /* Mobile responsive styles */
+  @media (max-width: 768px) {
+    .risk-indicator {
+      @apply p-4;
+    }
+    
+    .risk-header {
+      @apply flex-col items-start gap-2;
+    }
+    
+    .risk-score {
+      @apply flex-col gap-2;
+    }
+    
+    .score-text {
+      @apply text-left;
+    }
+  }
+}
+

@@ -1,5 +1,4 @@
 import React from 'react'
-import './RiskIndicator.css'
 
 const RiskIndicator = ({ title, score, riskLevel, description }) => {
   return (

@@ -14,7 +14,7 @@ app = FastAPI(title="Eye Health API", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -179,4 +179,4 @@ def save_user_data(request: EyeHealthRequest, db: Session = Depends(get_db)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=3001)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
