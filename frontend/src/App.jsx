@@ -12,6 +12,7 @@ import VitaminDReminder from "./components/VitaminDReminder";
 import HydrationReminder from "./components/HydrationReminder";
 import StressBuster from "./components/StressBuster";
 import HydrationBanner from "./components/HydrationBanner";
+import ActivityReminder from "./pages/ActivityReminder";
 
 function App() {
   const [hydrationOpen, setHydrationOpen] = useState(false);
@@ -63,6 +64,7 @@ function App() {
             <Route path="/vitamin-d-reminder" element={<VitaminDReminder />} />
             <Route path="/hydration-reminder" element={<HydrationReminder />} />
             <Route path="/stress-buster" element={<StressBuster />} />
+            <Route path="/activity-reminder" element={<ActivityReminder />} />
           </Routes>
         </main>
         <Footer />
