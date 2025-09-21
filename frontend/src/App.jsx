@@ -9,7 +9,7 @@ import HealthyYou from "./pages/HealthyYou";
 import HealthInfo from "./pages/HealthInfo";
 import EyeHealthAnalysis from "./pages/EyeHealthAnalysis";
 import VitaminDReminder from "./components/VitaminDReminder";
-import HydrationReminder from "./components/HydrationReminder";
+import HydrationReminder from "./pages/HydrationReminder";
 import StressBuster from "./components/StressBuster";
 import HydrationBanner from "./components/HydrationBanner";
 import ActivityReminder from "./pages/ActivityReminder";
