@@ -13,7 +13,7 @@ import {
   Sun,
   Zap
 } from "lucide-react";
-import { AnimatedAssistant } from "../components/AnimatedAssistant";
+import { AnimatedAssistant } from "./AnimatedAssistant";
 
 const EyeHealthAnalysis = () => {
   const navigate = useNavigate();

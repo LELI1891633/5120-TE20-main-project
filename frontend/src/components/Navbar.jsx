@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Home, Heart, Info } from "lucide-react";
+import { Menu, X, Home, Heart, Info, Gamepad2 } from "lucide-react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,6 +11,7 @@ const Navbar = () => {
     { to: "/", label: "Home", icon: Home },
     { to: "/healthy", label: "Healthy Space", icon: Heart },
     { to: "/health-info", label: "Health Info", icon: Info },
+    { to: "/stress-buster", label: "Stress Buster Game", icon: Gamepad2 },
   ];
 
   return (
@@ -47,10 +48,11 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500"
-              aria-expanded="false"
+              className="inline-flex items-center justify-center p-3 rounded-md text-white hover:text-white hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500 touch-manipulation active:bg-sky-700 transition-colors duration-200"
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Close main menu" : "Open main menu"}
             >
-              <span className="sr-only">Open main menu</span>
+              <span className="sr-only">{isMenuOpen ? "Close main menu" : "Open main menu"}</span>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -59,19 +61,41 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-slate-700">
-            {navItems.map(({ to, label, icon: Icon }) => (
-              <Link
-                key={to}
-                to={to}
-                className="flex items-center gap-3 px-3 py-2 rounded-md text-base font-medium text-white hover:text-white hover:bg-sky-600 transition-all duration-200"
+        <div className="md:hidden fixed inset-0 z-50 mobile-menu">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          
+          {/* Menu Panel */}
+          <div className="relative z-50 bg-slate-700 shadow-xl">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-sky-600">
+              <h2 className="text-lg font-semibold text-white">OfficeEase</h2>
+              <button
                 onClick={() => setIsMenuOpen(false)}
+                className="p-2 rounded-md text-white hover:text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500"
+                aria-label="Close menu"
               >
-                <Icon size={20} className="text-white" />
-                {label}
-              </Link>
-            ))}
+                <X size={24} />
+              </button>
+            </div>
+            
+            {/* Menu Items */}
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {navItems.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium text-white hover:text-white hover:bg-sky-600 transition-all duration-200 touch-manipulation"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Icon size={20} className="text-white flex-shrink-0" />
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       )}

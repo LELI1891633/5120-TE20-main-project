@@ -14,7 +14,7 @@ import {
   ArrowLeft,
   Droplet
 } from "lucide-react";
-import { AnimatedAssistant } from "../components/AnimatedAssistant";
+import { AnimatedAssistant } from "./AnimatedAssistant";
 
 const HealthyYou = () => {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const HealthyYou = () => {
     },
     {
       icon: Coffee,
-      title: "Physical Activity",
+      title: "Regular Breaks",
       description: "Movement and rest for better productivity",
       tips: [
         "Take a 5-minute break every 30 minutes",
@@ -191,17 +191,15 @@ const HealthyYou = () => {
                     </button>
                   )}
                   
-                  
-                  {title === "Physical Activity" && (
+                  {title === "Hydration" && (
                     <button
-                      onClick={() => navigate("/activity-reminder")}
-                      className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                      onClick={() => navigate("/hydration-reminder")}
+                      className="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
                     >
-                      Set Breaks
+                      Set Reminders
                       <ArrowRight size={16} />
                     </button>
                   )}
-
                 </div>
               </div>
             </div>
