@@ -11,7 +11,7 @@ import {
   Play,
   AlertTriangle
 } from "lucide-react";
-import { AnimatedAssistant } from "../components/AnimatedAssistant";
+import { AnimatedAssistant } from "./AnimatedAssistant";
 
 const LS_KEY = "vitamin-d.settings.v1";
 
