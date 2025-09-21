@@ -10,7 +10,8 @@ import {
   RotateCcw,
   CheckCircle,
   AlertTriangle,
-  ArrowLeft
+  ArrowLeft,
+  Info
 } from "lucide-react";
 import { AnimatedAssistant } from "../components/AnimatedAssistant";
 
@@ -119,16 +120,25 @@ export default function ActivityReminder() {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 mx-auto mb-8 max-w-4xl">
-        <div className="mb-6 flex items-center gap-4">
-          <button
-            onClick={() => navigate("/healthy-you")}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/20 px-4 py-2 font-medium text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/30 hover:shadow-md"
-          >
-            <ArrowLeft size={16} />
-            Back to Health Tips
-          </button>
-        </div>
+        <div className="relative z-10 mx-auto mb-8 max-w-4xl">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <button
+              onClick={() => navigate("/healthy-you")}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/20 px-4 py-2 font-medium text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/30 hover:shadow-md"
+            >
+              <ArrowLeft size={16} />
+              Back to Health Tips
+            </button>
+            <button
+              onClick={() => navigate("/health-info")}
+              className="inline-flex items-center gap-2 rounded-full bg-sky-600 px-3 py-2 text-white shadow-md transition-colors hover:bg-sky-700"
+              aria-label="Open Health Info"
+              title="Open Health Info"
+            >
+              <Info size={16} />
+              <span className="hidden sm:inline">Health Info</span>
+            </button>
+          </div>
 
         <div className="text-center">
           <div className="mb-4 flex items-center justify-center gap-3">
@@ -259,6 +269,7 @@ export default function ActivityReminder() {
                 <SkipForward size={18} />
                 Skip
               </button>
+            
 
               <button
                 onClick={reset}
