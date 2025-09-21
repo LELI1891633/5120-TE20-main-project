@@ -191,16 +191,8 @@ const HealthyYou = () => {
                     </button>
                   )}
                   
-                  {title === "Hydration" && (
-                    <button
-                      onClick={() => navigate("/hydration-reminder")}
-                      className="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
-                    >
-                      Set Reminders
-                      <ArrowRight size={16} />
-                    </button>
-                  )}
-                  {title === "Physical Activity Breaks" && (
+                  
+                  {title === "Physical Activity" && (
                     <button
                       onClick={() => navigate("/activity-reminder")}
                       className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
