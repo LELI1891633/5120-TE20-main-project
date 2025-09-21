@@ -14,7 +14,8 @@ import {
   ArrowLeft,
   Droplet
 } from "lucide-react";
-import { AnimatedAssistant } from "./AnimatedAssistant";
+
+import { AnimatedAssistant } from "../components/AnimatedAssistant";
 
 const HealthyYou = () => {
   const navigate = useNavigate();
