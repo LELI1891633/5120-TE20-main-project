@@ -10,9 +10,13 @@ import HealthInfo from "./pages/HealthInfo";
 import EyeHealthAnalysis from "./pages/EyeHealthAnalysis";
 import VitaminDReminder from "./components/VitaminDReminder";
 import HydrationReminder from "./pages/HydrationReminder";
-import StressBuster from "./components/StressBuster";
+import StressBuster from "./pages/StressBuster";
 import HydrationBanner from "./components/HydrationBanner";
 import ActivityReminder from "./pages/ActivityReminder";
+import BreathingGame from "./pages/BreathingGame";
+import BubblePopGame from "./pages/BubblePopGame";
+import WhackGame from "./pages/WhackGame";
+import SandGame from "./pages/SandGame";
 
 function App() {
   const [hydrationOpen, setHydrationOpen] = useState(false);
@@ -65,6 +69,10 @@ function App() {
             <Route path="/hydration-reminder" element={<HydrationReminder />} />
             <Route path="/stress-buster" element={<StressBuster />} />
             <Route path="/activity-reminder" element={<ActivityReminder />} />
+            <Route path="/stress-buster/breathing" element={<BreathingGame />} />
+            <Route path="/stress-buster/bubbles" element={<BubblePopGame />} />
+            <Route path="/stress-buster/whack" element={<WhackGame />} />
+            <Route path="/stress-buster/sand" element={<SandGame />} />
           </Routes>
         </main>
         <Footer />
