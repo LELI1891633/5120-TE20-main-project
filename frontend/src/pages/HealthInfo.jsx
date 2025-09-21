@@ -171,7 +171,7 @@ function SedentaryBlock() {
         {/* Pie Chart */}
         <div className="bg-white rounded-lg p-6 shadow-sm border">
           <h3 className="text-lg font-semibold text-slate-800 mb-4 text-center">
-            {metrics.find(m => m.key === selectedMetric)?.label} Distribution by Age Group (2022)
+            {metrics.find(m => m.key === selectedMetric)?.label} Distribution by Age Group
           </h3>
           
           <div className="flex flex-col lg:flex-row items-center justify-center gap-8">

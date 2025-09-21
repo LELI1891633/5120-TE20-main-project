@@ -19,7 +19,7 @@ const STEPS = [
   {
     title: "Neck & Shoulder Rolls",
     duration: 45,
-    cue: "Roll shoulders back ×5, forward ×5. Gentle neck circles within a comfy range."
+    cue: "Roll shoulders back x5, forward x5. Gentle neck circles within a comfy range."
   },
   {
     title: "Seated Spinal Twist",
@@ -39,11 +39,11 @@ const STEPS = [
   {
     title: "Box Breathing",
     duration: 45,
-    cue: "In 4 • Hold 4 • Out 4 • Hold 4. Repeat calmly."
+    cue: "In 4 . Hold 4 . Out 4 . Hold 4. Repeat calmly."
   }
 ];
 
-const totalDuration = STEPS.reduce((s, x) => s + x.duration, 0); // 240s ≈ 4:00
+const totalDuration = STEPS.reduce((s, x) => s + x.duration, 0); // 240s = 4:00
 
 export default function ActivityReminder() {
   const navigate = useNavigate();
@@ -192,7 +192,7 @@ export default function ActivityReminder() {
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <span className="font-medium text-green-800">
-                    Great job! You’ve completed the 4-minute Movement Challenge. 🎉
+                    Great job! You've completed the 4-minute Movement Challenge.
                   </span>
                 </div>
               </div>
@@ -298,10 +298,10 @@ export default function ActivityReminder() {
         position="bottom-right"
         accent="indigo"
         steps={[
-          { text: "Welcome to the Movement Challenge! 💪" },
-          { text: "You’ll complete 5 short steps in under 5 minutes." },
+          { text: "Welcome to the Movement Challenge!" },
+          { text: "You'll complete 5 short steps in under 5 minutes." },
           { text: "Follow the cues, hit Start, and you can Pause/Skip any time." },
-          { text: "Ready? Let’s reset posture and boost your energy!" }
+          { text: "Ready? Let's reset posture and boost your energy!" }
         ]}
         onClose={() => setAssistantOpen(false)}
       />
