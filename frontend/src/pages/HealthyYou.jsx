@@ -47,7 +47,7 @@ const HealthyYou = () => {
     },
     {
       icon: Coffee,
-      title: "Physical Activity Breaks",
+      title: "Physical Activity",
       description: "Movement and rest for better productivity",
       tips: [
         "Take a 5-minute break every 30 minutes",
