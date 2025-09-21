@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import LandingPage from "./pages/LandingPage";
-import HealthyPage from "./pages/HealthyPage";
-import HealthyDesk from "./pages/HealthyDesk";
-import HealthyYou from "./pages/HealthyYou";
-import HealthInfo from "./pages/HealthInfo";
-import EyeHealthAnalysis from "./pages/EyeHealthAnalysis";
-import VitaminDReminder from "./pages/VitaminDReminder";
-import HydrationReminder from "./pages/HydrationReminder";
-import StressBuster from "./pages/StressBuster";
+import LandingPage from "./components/LandingPage";
+import HealthyPage from "./components/HealthyPage";
+import HealthyDesk from "./components/HealthyDesk";
+import HealthyYou from "./components/HealthyYou";
+import HealthInfo from "./components/HealthInfo";
+import EyeHealthAnalysis from "./components/EyeHealthAnalysis";
+import VitaminDReminder from "./components/VitaminDReminder";
+import HydrationReminder from "./components/HydrationReminder";
+import StressBuster from "./components/StressBuster";
 import HydrationBanner from "./components/HydrationBanner";
 
 function App() {

@@ -424,58 +424,41 @@ export default function HydrationReminder() {
 
             <div className="rounded-xl border p-4">
               <label className="block text-sm font-medium mb-2">Office hours</label>
-              <div className="flex items-start gap-2">
-                <div className="flex flex-col">
-                  <input
-                    type="number"
-                    min={0}
-                    max={23}
-                    value={officeStart}
-                    onChange={handleOfficeStartChange}
-                    className={`w-20 rounded-lg border px-3 py-2 text-base sm:text-sm ${
-                      inputErrors.officeStart ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                    }`}
-                    aria-label="Start hour"
-                    placeholder="9"
-                  />
-                  {/* Fixed height container to prevent layout shift */}
-                  <div className="mt-1 h-4 flex items-start">
-                    {inputErrors.officeStart && (
-                      <div className="flex items-center gap-1 text-xs text-red-600">
-                        <AlertTriangle size={10} />
-                        <span className="truncate">{inputErrors.officeStart}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <span className="text-sm mt-2">to</span>
-                <div className="flex flex-col">
-                  <input
-                    type="number"
-                    min={0}
-                    max={23}
-                    value={officeEnd}
-                    onChange={handleOfficeEndChange}
-                    className={`w-20 rounded-lg border px-3 py-2 text-base sm:text-sm ${
-                      inputErrors.officeEnd ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                    }`}
-                    aria-label="End hour"
-                    placeholder="17"
-                  />
-                  {/* Fixed height container to prevent layout shift */}
-                  <div className="mt-1 h-4 flex items-start">
-                    {inputErrors.officeEnd && (
-                      <div className="flex items-center gap-1 text-xs text-red-600">
-                        <AlertTriangle size={10} />
-                        <span className="truncate">{inputErrors.officeEnd}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  max={23}
+                  value={officeStart}
+                  onChange={handleOfficeStartChange}
+                  className={`w-20 rounded-lg border px-3 py-2 text-base sm:text-sm ${
+                    inputErrors.officeStart || inputErrors.officeEnd ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  aria-label="Start hour"
+                  placeholder="9"
+                />
+                <span className="text-sm">to</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={23}
+                  value={officeEnd}
+                  onChange={handleOfficeEndChange}
+                  className={`w-20 rounded-lg border px-3 py-2 text-base sm:text-sm ${
+                    inputErrors.officeStart || inputErrors.officeEnd ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  aria-label="End hour"
+                  placeholder="17"
+                />
               </div>
-              {/* Fixed height container for help text */}
-              <div className="mt-2 h-4 flex items-start">
-                {!inputErrors.officeStart && !inputErrors.officeEnd && (
+              {/* Single error message container with fixed height */}
+              <div className="mt-2 h-5 flex items-start">
+                {(inputErrors.officeStart || inputErrors.officeEnd) ? (
+                  <div className="flex items-center gap-1 text-xs text-red-600">
+                    <AlertTriangle size={12} />
+                    Please enter values between 0 and 23
+                  </div>
+                ) : (
                   <p className="text-xs text-slate-500">0-23 hours (24-hour format). Example: 9 to 17 covers 9:00–17:00.</p>
                 )}
               </div>
