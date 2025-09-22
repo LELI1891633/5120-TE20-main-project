@@ -1,0 +1,96 @@
+name: Deploy Lambda (production)
+
+on:
+  push:
+    branches: [ "production" ]
+    paths:
+      - "backend/"
+      - ".github/workflows/deploy-prod.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: lambda-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment: production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('backend/requirements.txt') }}
+
+      - name: Build artifact (zip only backend/)
+        run: |
+          cd backend
+          rm -rf build ../function.zip
+          mkdir -p build
+          if [ -f requirements.txt ]; then pip install -r requirements.txt -t build; fi
+          cp -r lambda_function.py build/
+          # cp -r handler.py build/   # (use if that’s your entrypoint)
+          [ -f app.py ] && cp app.py build/
+          [ -f db.py ] && cp db.py build/
+          [ -f eye_multiclass_model.pkl ] && cp eye_multiclass_model.pkl build/
+          [ -f le_gender.pkl ] && cp le_gender.pkl build/
+          [ -f Model1_Iteration1.py ] && cp Model1_Iteration1.py build/
+          [ -d src ] && cp -r src/* build/
+          cd build && zip -r ../../function.zip . && cd ../..
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Update function code
+        run: |
+          aws lambda update-function-code \
+            --function-name "${{ vars.LAMBDA_FUNCTION_NAME }}" \
+            --zip-file fileb://function.zip
+
+      - name: Publish new version
+        id: pub
+        run: |
+          OUT=$(aws lambda publish-version \
+            --function-name "${{ vars.LAMBDA_FUNCTION_NAME }}" \
+            --description "commit $GITHUB_SHA on $GITHUB_REF_NAME")
+          VERSION=$(echo "$OUT" | jq -r '.Version')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Point alias to new version (create if missing)
+        run: |
+          ALIAS="${{ vars.ALIAS_NAME }}"
+          FN="${{ vars.LAMBDA_FUNCTION_NAME }}"
+          VER="${{ steps.pub.outputs.version }}"
+          aws lambda update-alias --function-name "$FN" --name "$ALIAS" --function-version "$VER" \
+          || aws lambda create-alias --function-name "$FN" --name "$ALIAS" --function-version "$VER"
+
+      - name: Smoke test (optional)
+        if: ${{ vars.API_BASE != '' }}
+        run: |
+          set -e
+          URL="${{ vars.API_BASE }}/health"
+          echo "Hitting $URL"
+          for i in {1..6}; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || true)
+            if [ "$CODE" = "200" ]; then echo "OK"; exit 0; fi
+            echo "Attempt $i failed ($CODE). Sleeping..."
+            sleep 5
+          done
+          echo "Smoke test failed"
+          exit 1
