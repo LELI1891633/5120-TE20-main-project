@@ -12,7 +12,7 @@ load_dotenv()
 
 DB_URL = os.getenv("DB_URL")
 if not DB_URL:
-    print("❌ DB_URL not found in .env file")
+    print("DB_URL not found in .env file")
     print("Please create a .env file with your database connection string")
     print("Example: DB_URL=mysql+pymysql://username:password@localhost:3306/database_name")
     exit(1)
@@ -35,12 +35,12 @@ try:
         
         conn.execute(create_table_sql)
         conn.commit()
-        print("✅ user_health table created successfully")
+        print("user_health table created successfully")
         
         # Check if table exists and show structure
         result = conn.execute(text("DESCRIBE user_health"))
         columns = result.fetchall()
-        print("\n📋 Table structure:")
+        print("\nTable structure:")
         for col in columns:
             print(f"  {col[0]} - {col[1]} - {col[2]}")
         
@@ -49,7 +49,7 @@ try:
         count = count_result.fetchone()[0]
         
         if count == 0:
-            print("\n📊 Inserting sample data...")
+            print("\nInserting sample data...")
             sample_data = [
                 (25, "Male", 8.5, 2.0),
                 (30, "Female", 6.0, 3.5),
@@ -70,20 +70,20 @@ try:
                 })
             
             conn.commit()
-            print(f"✅ Inserted {len(sample_data)} sample records")
+            print(f"Inserted {len(sample_data)} sample records")
         else:
-            print(f"📊 Table already contains {count} records")
+            print(f"Table already contains {count} records")
             
         # Show sample data
-        print("\n📋 Sample data:")
+        print("\nSample data:")
         result = conn.execute(text("SELECT * FROM user_health LIMIT 5"))
         rows = result.fetchall()
         for row in rows:
             print(f"  ID: {row[0]}, Age: {row[1]}, Gender: {row[2]}, Screen: {row[3]}h, Activity: {row[4]}h")
             
 except Exception as e:
-    print(f"❌ Database initialization failed: {e}")
-    print("\n🔧 Troubleshooting:")
+    print(f"Database initialization failed: {e}")
+    print("\nTroubleshooting:")
     print("1. Make sure MySQL server is running")
     print("2. Check your database credentials in .env file")
     print("3. Ensure the database exists")

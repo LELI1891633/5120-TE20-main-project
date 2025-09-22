@@ -2,7 +2,7 @@
 
 This is the new FastAPI-based backend for the Eye Health Analysis system, replacing the local model system with a cloud-ready, database-backed solution.
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Database Setup
 
@@ -51,7 +51,7 @@ The API will be available at:
 - **Documentation**: http://127.0.0.1:3001/docs
 - **Health Check**: http://127.0.0.1:3001/health
 
-## 📊 API Endpoints
+## API Endpoints
 
 ### Eye Health Analysis
 - **POST** `/api/eye-health/analyze`

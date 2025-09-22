@@ -1,23 +1,42 @@
-// src/pages/StressBuster.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flower2, Info, Play, Sparkles, Wind, Gamepad2, Target } from "lucide-react";
 
+const API_BASE = import.meta.env.VITE_API_BASE;
+
 export default function StressBuster() {
   const navigate = useNavigate();
   const [tip, setTip] = useState("");
+  const [loadingTip, setLoadingTip] = useState(false);
+  const [tipErr, setTipErr] = useState("");
 
-  const tips = [
+  const fallbackTips = [
     "Try 4-4-4-4 box breathing for one minute.",
     "Unclench your jaw, drop your shoulders, and exhale slowly.",
     "Stand up, roll your shoulders, and take 5 deep breaths.",
     "Look far away for 20 seconds to reset focus.",
     "Sip water and make your exhale slightly longer than inhale.",
   ];
-  const getTip = () => {
-    setTip(tips[Math.floor(Math.random() * tips.length)]);
-    setTimeout(() => setTip(""), 6000);
-  };
+
+  async function getTip() {
+    setTipErr("");
+    setLoadingTip(true);
+    try {
+      const res = await fetch(`${API_BASE}/tips/random`, { headers: { "Content-Type": "application/json" } });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      setTip(data.text || "");
+    } catch (e) {
+      // fallback if API fails
+      const t = fallbackTips[Math.floor(Math.random() * fallbackTips.length)];
+      setTip(t);
+      setTipErr("Showing an offline tip while we reach the server.");
+    } finally {
+      setLoadingTip(false);
+      // auto clear after 6s
+      setTimeout(() => setTip(""), 6000);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50">
