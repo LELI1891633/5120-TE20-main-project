@@ -53,6 +53,11 @@ jobs:
           [ -d src ] && cp -r src/* build/
           # Create zip at repo root
           cd build && zip -r ../../function.zip . && cd ../..
+      - name: Debug ref
+        run: |
+          echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_REF_NAME=${GITHUB_REF_NAME}"
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
