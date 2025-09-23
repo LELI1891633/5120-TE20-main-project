@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { ArrowRight, Heart, Shield, Zap, Eye, Droplets, Sun, Gamepad2, Info, Activity } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight, Heart, Shield, Zap } from "lucide-react";
 import { AnimatedAssistant } from "../components/AnimatedAssistant";
 
 const LandingPage = () => {
@@ -23,15 +23,6 @@ const LandingPage = () => {
       title: "Quick Assessment",
       description: "Get instant feedback on your workspace in just minutes"
     }
-  ];
-
-  const quickLinks = [
-    { to: "/activity-reminder", label: "Activity Reminder", icon: Activity, color: "from-emerald-100 to-green-100", iconColor: "text-emerald-700" },
-    { to: "/eye-health-analysis", label: "Eye Health Analysis", icon: Eye, color: "from-sky-100 to-indigo-100", iconColor: "text-sky-700" },
-    { to: "/hydration-reminder", label: "Hydration Reminder", icon: Droplets, color: "from-cyan-100 to-teal-100", iconColor: "text-cyan-700" },
-    { to: "/vitamin-d-reminder", label: "Vitamin D Reminder", icon: Sun, color: "from-amber-100 to-yellow-100", iconColor: "text-amber-600" },
-    { to: "/stress-buster", label: "Stress Buster", icon: Gamepad2, color: "from-pink-100 to-rose-100", iconColor: "text-pink-600" },
-    { to: "/health-info", label: "Health Info", icon: Info, color: "from-violet-100 to-purple-100", iconColor: "text-violet-700" },
   ];
 
   return (
@@ -106,25 +97,6 @@ const LandingPage = () => {
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Quick Links */}
-          <div className="mt-12">
-            <h2 className="text-xl font-semibold text-slate-800 mb-4">Quick Links</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {quickLinks.map(({ to, label, icon: Icon, color, iconColor }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className={`group relative bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/30 hover:bg-white/30 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg`}
-                >
-                  <div className={`inline-flex items-center justify-center bg-gradient-to-br ${color} p-2 rounded-lg mb-3 shadow`}>
-                    <Icon className={`${iconColor}`} size={20} />
-                  </div>
-                  <div className="text-sm font-medium text-slate-800 group-hover:text-slate-900">{label}</div>
-                </Link>
-              ))}
-            </div>
           </div>
         </div>
       </section>
