@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, ArrowLeft } from "lucide-react";
+import { ExternalLink, ArrowLeft, Heart } from "lucide-react";
 // Static sedentary data for 2022 (Australia)
 const STATIC_SEDENTARY = {
   year: 2022,
@@ -36,14 +36,21 @@ const HealthInfo = () => {
         <div className="absolute bottom-1/3 right-0 w-80 h-80 bg-gradient-to-br from-sky-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
       </div>
       <div className="relative z-10 max-w-4xl mx-auto">
-        {/* Back Button */}
-        <div className="mb-6">
+        {/* Navigation Buttons */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-slate-700 font-medium px-4 py-2 rounded-lg border border-white/30 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <ArrowLeft size={16} />
             Back to Home
+          </button>
+          <button
+            onClick={() => navigate("/stress-buster")}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-md hover:from-pink-500/30 hover:to-purple-500/30 text-slate-700 font-medium px-4 py-2 rounded-lg border border-pink-300/30 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <Heart size={16} />
+            Go to Stress Buster
           </button>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">Health Information</h1>
