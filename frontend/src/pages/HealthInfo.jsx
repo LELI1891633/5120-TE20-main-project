@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ExternalLink, ArrowLeft, Heart } from "lucide-react";
-// Static sedentary data for 2022 (Australia)
+// Static sedentary data (Australia)
 const STATIC_SEDENTARY = {
   year: 2022,
   breakdown: [
@@ -58,7 +58,7 @@ const HealthInfo = () => {
         {/* National Sedentary (2022) */}
         <section className="mb-8">
           <div className="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg border border-white/30 p-6">
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">National Sedentary (2022)</h2>
+            <h2 className="text-xl font-semibold text-slate-800 mb-3">National Sedentary </h2>
             <SedentaryBlock />
           </div>
         </section>
@@ -66,7 +66,7 @@ const HealthInfo = () => {
         {/* Physical Activity Guidelines (2022) */}
         <section className="mb-8">
           <div className="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg border border-white/30 p-6">
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">Physical Activity Guidelines Compliance (2022)</h2>
+            <h2 className="text-xl font-semibold text-slate-800 mb-3">Physical Activity Guidelines Compliance </h2>
             <ActivityGuidelinesBlock />
           </div>
         </section>
@@ -290,7 +290,7 @@ function SedentaryBlock() {
           
           {/* Chart description */}
           <div className="mt-6 text-sm text-slate-600 text-center">
-            Data shows the distribution of {metrics.find(m => m.key === selectedMetric)?.label.toLowerCase()} across different age groups in Australia (2022)
+            Data shows the distribution of {metrics.find(m => m.key === selectedMetric)?.label.toLowerCase()} across different age groups in Australia
           </div>
         </div>
       </div>
@@ -345,7 +345,7 @@ function ActivityGuidelinesBlock() {
         {/* Bar Chart */}
         <div className="bg-white rounded-lg p-6 shadow-sm border">
           <h3 className="text-lg font-semibold text-slate-800 mb-4 text-center">
-            {metrics.find(m => m.key === selectedMetric)?.label} by Age Group (2022)
+            {metrics.find(m => m.key === selectedMetric)?.label} by Age Group
           </h3>
           
           <div className="overflow-x-auto">
@@ -403,7 +403,7 @@ function ActivityGuidelinesBlock() {
           
           {/* Chart description */}
           <div className="mt-4 text-sm text-slate-600 text-center">
-            Data shows the percentage of each age group meeting physical activity guidelines in Australia (2022)
+            Data shows the percentage of each age group meeting physical activity guidelines in Australia
           </div>
         </div>
       </div>
