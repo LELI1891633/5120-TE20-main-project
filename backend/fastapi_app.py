@@ -69,7 +69,6 @@ class BreakStepOut(BaseModel):
     duration: int  # seconds
     sequence: int
 
-
 # ---------- Health ----------
 @app.get("/health")
 def health():
