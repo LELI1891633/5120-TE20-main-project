@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import LandingPage from "./components/LandingPage";
@@ -17,6 +17,26 @@ import BreathingGame from "./pages/BreathingGame";
 import BubblePopGame from "./pages/BubblePopGame";
 import WhackGame from "./pages/WhackGame";
 import SandGame from "./pages/SandGame";
+
+// Scroll to top component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Scroll to top on route change
+    window.scrollTo(0, 0);
+    
+    // For mobile devices, also reset scroll position
+    if (document.documentElement.scrollTop > 0) {
+      document.documentElement.scrollTop = 0;
+    }
+    if (document.body.scrollTop > 0) {
+      document.body.scrollTop = 0;
+    }
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   const [hydrationOpen, setHydrationOpen] = useState(false);
@@ -48,6 +68,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1">
