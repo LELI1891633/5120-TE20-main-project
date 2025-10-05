@@ -11,8 +11,6 @@ import EyeHealthAnalysis from "./pages/EyeHealthAnalysis";
 import VitaminDReminder from "./components/VitaminDReminder";
 import HydrationReminder from "./pages/HydrationReminder";
 import StressBuster from "./pages/StressBuster";
-import HydrationReminder from "./pages/HydrationReminder";
-import StressBuster from "./components/StressBuster";
 import HydrationBanner from "./components/HydrationBanner";
 import ActivityReminder from "./pages/ActivityReminder";
 import BreathingGame from "./pages/BreathingGame";
