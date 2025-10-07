@@ -25,7 +25,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-xl font-bold text-yellow-300">OfficeEase</h1>
+            <h1 className="text-xl font-bold text-yellow-300">OfficeEz</h1>
           </div>
 
           {/* Desktop Navigation */}
@@ -72,7 +72,7 @@ const Navbar = () => {
           <div className="relative z-50 bg-slate-700 shadow-xl">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-sky-600">
-              <h2 className="text-lg font-semibold text-yellow-300">OfficeEase</h2>
+              <h2 className="text-lg font-semibold text-yellow-300">OfficeEz</h2>
               <button
                 onClick={() => setIsMenuOpen(false)}
                 className="p-2 rounded-md text-white hover:text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500"

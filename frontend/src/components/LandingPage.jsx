@@ -52,13 +52,13 @@ const LandingPage = () => {
             <div className="relative z-10 space-y-6">
               <div className="inline-flex items-center gap-2 bg-sky-500/20 text-sky-100 px-4 py-2 rounded-full text-sm font-medium">
                 <Heart size={16} />
-                Welcome to OfficeEase
+                Welcome to OfficeEz
               </div>
               
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
                 Hi, welcome to{" "}
                 <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                  OfficeEase
+                  OfficeEz
                 </span>{" "}
                 👋
               </h1>
@@ -133,11 +133,11 @@ const LandingPage = () => {
       {/* Animated Assistant */}
       <AnimatedAssistant
         open={assistantOpen}
-        name="OfficeEase Assistant"
+        name="OfficeEz Assistant"
         position="bottom-right"
         accent="sky"
         steps={[
-          { text: "Hi! I'm your OfficeEase assistant. Let me help you get started! 👋" },
+          { text: "Hi! I'm your OfficeEz assistant. Let me help you get started! 👋" },
           { text: "I'll guide you through creating a healthier workspace environment." },
           { text: "Click 'Let's Start' above to begin your ergonomic assessment!" },
           { text: "Feel free to explore our features or ask me anything about workspace health." }
