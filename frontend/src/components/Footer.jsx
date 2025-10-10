@@ -87,7 +87,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="mt-8 pt-8 border-t border-slate-700 text-center">
           <p className="text-slate-400 text-sm">
-            © 2024 OfficeEase. All recommendations are for informational purposes only. 
+            © 2025 OfficeEz. All recommendations are for informational purposes only. 
             Consult healthcare professionals for medical advice.
           </p>
         </div>

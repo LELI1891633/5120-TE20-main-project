@@ -68,8 +68,8 @@ function Bubble({ children, accent = "indigo", width = 360 }) {
 
 export function AnimatedAssistant({
   open = true,
-  name = "OfficeEase Assistant",
-  steps = [{ text: "Hi! I'm your OfficeEase assistant. Let me help you get started! 🎉" }],
+  name = "OfficeEz Assistant",
+  steps = [{ text: "Hi! I'm your OfficeEz assistant. Let me help you get started! 🎉" }],
   initialStep = 0,
   position = "bottom-right",
   accent = "sky",
