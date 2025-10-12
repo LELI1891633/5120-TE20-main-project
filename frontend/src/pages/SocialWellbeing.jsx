@@ -1,41 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Heart,
-  Smile,
-  Meh,
-  Frown,
-  Zap,
-  Users,
-  ArrowLeft,
-} from "lucide-react";
+import { Heart, Smile, Users, ArrowLeft } from "lucide-react";
+import MoodAnalysis from "./MoodAnalysis";
+import ConnectionScore from "./ConnectionScore";
 
 export default function SocialWellbeing() {
   const navigate = useNavigate();
   const [view, setView] = useState("main");
-  const [mood, setMood] = useState("");
-  const [theme, setTheme] = useState("");
-  const [message, setMessage] = useState("");
-
-  const moods = [
-    { name: "Stressed", color: "bg-rose-100", icon: <Frown /> },
-    { name: "Low Mood", color: "bg-blue-100", icon: <Meh /> },
-    { name: "Energized", color: "bg-yellow-100", icon: <Zap /> },
-    { name: "Neutral", color: "bg-green-100", icon: <Smile /> },
-  ];
-
-  const handleMood = (m) => {
-    setMood(m.name);
-    setTheme(m.color);
-    setMessage(`Thanks for sharing — it's okay to feel ${m.name.toLowerCase()} today.`);
-  };
-
-  const recommendations = {
-    Stressed: ["Play Stress Buster Game", "Try breathing exercise"],
-    "Low Mood": ["Listen to Mood-Boosting Playlist", "Read positivity quotes"],
-    Energized: ["Track Hydration", "Stretch or walk break"],
-    Neutral: ["Check Wellbeing Insights", "Reflect on gratitude list"],
-  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-sky-50 via-indigo-50 to-blue-50 py-6 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -74,13 +45,11 @@ export default function SocialWellbeing() {
 
       {/* Main Section */}
       <div className="relative z-10 mx-auto max-w-4xl space-y-10">
-        {/* MAIN CARDS VIEW */}
         {view === "main" && (
           <div className="rounded-3xl border border-white/30 bg-white/20 p-8 shadow-xl backdrop-blur-md">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Mood Analysis */}
-              <div className="flex flex-col justify-between h-80 bg-gradient-to-br from-fuchsia-500 to-purple-600 
-                           text-white p-6 rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all">
+              <div className="flex flex-col justify-between h-80 bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white p-6 rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Smile className="text-white" />
@@ -99,8 +68,7 @@ export default function SocialWellbeing() {
               </div>
 
               {/* Connection Score Calculator */}
-              <div className="flex flex-col justify-between h-80 bg-gradient-to-br from-indigo-500 to-sky-600 
-                           text-white p-6 rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all">
+              <div className="flex flex-col justify-between h-80 bg-gradient-to-br from-indigo-500 to-sky-600 text-white p-6 rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Users className="text-white" />
@@ -121,77 +89,8 @@ export default function SocialWellbeing() {
           </div>
         )}
 
-        {/* MOOD ANALYSIS VIEW */}
-        {view === "mood" && (
-          <div
-            className={`rounded-3xl border border-white/30 bg-white/20 p-8 shadow-xl backdrop-blur-md ${theme}`}
-          >
-            <button
-              onClick={() => {
-                setView("main");
-                setMood("");
-              }}
-              className="mb-6 inline-flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-white/30 transition-all"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
-
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">
-              How are you feeling today?
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Select your current mood to receive supportive color themes and personalized recommendations.
-            </p>
-
-            {/* Mood Selection Buttons */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {moods.map((m) => (
-                <button
-                  key={m.name}
-                  onClick={() => handleMood(m)}
-                  className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl shadow hover:scale-105 transition"
-                >
-                  {m.icon}
-                  <span className="mt-2 font-medium text-slate-700">{m.name}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Results Section */}
-            {mood && (
-              <div className="bg-white rounded-2xl shadow p-6">
-                <p className="font-medium text-gray-800 mb-2">{message}</p>
-                <h3 className="font-semibold mb-2 text-sky-800">Your Recommendations:</h3>
-                <ul className="list-disc ml-6 text-gray-700 space-y-1">
-                  {recommendations[mood].map((r, i) => (
-                    <li key={i}>{r}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* CONNECTION SCORE VIEW */}
-        {view === "connection" && (
-          <div className="rounded-3xl border border-white/30 bg-white/20 p-8 shadow-xl backdrop-blur-md text-center">
-            <button
-              onClick={() => setView("main")}
-              className="mb-6 inline-flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-white/30 transition-all"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">
-              Connection Score Calculator
-            </h2>
-            <p className="text-gray-600 mb-6">
-              This upcoming feature will include a short quiz to calculate your
-              workplace connection score and provide helpful recommendations.
-            </p>
-          </div>
-        )}
+        {view === "mood" && <MoodAnalysis onBack={() => setView("main")} />}
+        {view === "connection" && <ConnectionScore onBack={() => setView("main")} />}
       </div>
     </div>
   );
