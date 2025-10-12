@@ -60,7 +60,7 @@ const HealthyYou = () => {
     },
     {
       icon: Heart,
-      title: "Mental Wellness",
+      title: "Social Connection &  well-being",
       description: "Maintain your psychological health",
       tips: [
         "Practice deep breathing exercises",
@@ -207,6 +207,15 @@ const HealthyYou = () => {
                       className="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
                     >
                       Set Reminders
+                      <ArrowRight size={16} />
+                    </button>
+                  )}
+                  {title === "Social Connection &  well-being" && (
+                    <button
+                      onClick={() => navigate("/social-wellbeing")}
+                      className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                    >
+                      Explore More
                       <ArrowRight size={16} />
                     </button>
                   )}
