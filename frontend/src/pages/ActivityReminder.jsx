@@ -8,15 +8,6 @@ import { AnimatedAssistant } from "../components/AnimatedAssistant";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-// Local fallback (used if API fails)
-// const FALLBACK_STEPS = [
-//   { id: 1, title: "Neck & Shoulder Rolls", duration: 45, cue: "Roll shoulders back ×5, forward ×5. Gentle neck circles within a comfy range." },
-//   { id: 2, title: "Seated Spinal Twist", duration: 45, cue: "Sit tall. Twist to the right holding the chair back. Breathe. Switch sides halfway." },
-//   { id: 3, title: "Chair Squats", duration: 60, cue: "Stand up and sit down with control. Chest tall. Comfortable pace." },
-//   { id: 4, title: "Wrist & Ankle Circles", duration: 45, cue: "Circle wrists ~20s, then ankles. Reverse direction halfway." },
-//   { id: 5, title: "Box Breathing", duration: 45, cue: "In 4 • Hold 4 • Out 4 • Hold 4. Repeat calmly." }
-// ];
-
 export default function ActivityReminder() {
   const navigate = useNavigate();
 
@@ -47,28 +38,31 @@ export default function ActivityReminder() {
         const data = await res.json();
 
         // normalize: accept duration or duration_min fields
-        const normalized = (Array.isArray(data) ? data : []).map((d, i) => ({
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data.items)
+          ? data.items
+          : [];
+
+        const normalized = list.map((d, i) => ({
           id: d.id ?? i + 1,
-          title: d.title ?? `Step ${i + 1}`,
-          duration: Number(d.duration ?? d.duration_min ?? 45),
-          cue: d.cue ?? d.steps?.join(" • ") ?? ""
-        })).filter(s => s.duration > 0);
+          title: d.area_name || d.site_name || `Step ${i + 1}`,
+          duration: 45, // since DB doesn’t have duration field, default to 45 sec per step
+          cue: d.steps || "",
+        }));
 
         if (!ignore) {
-          const finalSteps = normalized.length ? normalized : FALLBACK_STEPS;
-          setSteps(finalSteps);
+          setSteps(normalized);
           setIdx(0);
-          setRemaining(finalSteps[0]?.duration ?? 0);
+          setRemaining(normalized[0]?.duration ?? 0);
         }
-      } catch (e) {
-        if (!ignore) {
-          setErr(e.message || "Failed to load");
-          // fallback
-          setSteps(FALLBACK_STEPS);
-          setIdx(0);
-          setRemaining(FALLBACK_STEPS[0].duration);
+       } catch (e) {
+          if (!ignore) {
+            setErr(e.message || "Failed to load");
+            setSteps([]);
+          }
         }
-      } finally {
+       finally {
         if (!ignore) setLoading(false);
       }
     })();
