@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flower2, Info, Play, Sparkles, Wind, Gamepad2, Target } from "lucide-react";
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export default function StressBuster() {
   const navigate = useNavigate();
