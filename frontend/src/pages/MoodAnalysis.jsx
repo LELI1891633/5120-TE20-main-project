@@ -7,9 +7,6 @@ export default function MoodAnalysis({ onBack }) {
   const [bgGradient, setBgGradient] = useState("from-sky-50 to-indigo-50");
   const [message, setMessage] = useState("");
 
-
-  
-
   // Scroll to center whenever mood changes
   useEffect(() => {
     if (mood) {
@@ -36,19 +33,19 @@ export default function MoodAnalysis({ onBack }) {
   const recommendations = {
     Stressed: [
       { text: "Play Stress Buster Game", link: "/stress-buster" },
-      { text: "Try Breathing Exercise", link: "/breathing-game" },
+      { text: "Try Breathing Exercise", link: "/stress-buster/breathing" },
     ],
     "Low Mood": [
-      { text: "Pop Some Bubbles", link: "/bubble-pop-game" },
-      { text: "Read Positivity Tips", link: "/healthy-you" },
+      { text: "Pop Some Bubbles", link: "/stress-buster/bubbles" },
+      { text: "Read Health Tips", link: "/health-info" },
     ],
     Energized: [
       { text: "Track Hydration", link: "/hydration-reminder" },
       { text: "Stretch or Walk Break", link: "/activity-reminder" },
     ],
     Neutral: [
-      { text: "Explore Wellbeing Insights", link: "/healthy-you" },
-      { text: "Play Sand Game", link: "/sand-game" },
+      { text: "Explore Wellbeing Insights", link: "/health-info" },
+      { text: "Set Vitamin-D reminder", link: "/vitamin-d-reminder" },
     ],
   };
 

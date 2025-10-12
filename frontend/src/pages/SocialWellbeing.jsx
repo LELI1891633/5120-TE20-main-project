@@ -8,11 +8,11 @@ export default function SocialWellbeing() {
   const navigate = useNavigate();
   const [view, setView] = useState("main");
 
-  // 👇 Smooth scroll when view changes
+  // Smooth scroll when switching between main/mood/connection
   useEffect(() => {
     if (view === "mood" || view === "connection") {
       window.scrollTo({
-        top: 200, // scrolls down to center the component nicely
+        top: 200, // centers the inner component nicely
         behavior: "smooth",
       });
     } else if (view === "main") {
