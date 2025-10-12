@@ -1,27 +1,59 @@
-# For LOCAL development and testing ONLY
+# # For LOCAL development and testing ONLY
 
-# This file builds a simple Python container
-# running FastAPI app using Uvicorn
+# # This file builds a simple Python container
+# # running FastAPI app using Uvicorn
 
-# Starting from a lightweight Python image
+# # Starting from a lightweight Python image
+# FROM python:3.11-slim
+
+# # Setting working directory inside the container
+# WORKDIR /app
+
+# # Copying dependency list
+# COPY requirements.txt .
+
+# # Installing dependencies
+# # --no-cache-dir keeps image smaller
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# # Copying all backend code into container
+# COPY . .
+
+# # Exposing backend port for access from host
+# EXPOSE 8088
+
+# # Command to start FastAPI with Uvicorn
+# # "app:app" → file_name:function_name inside app.py
+# CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8088"]
+
+
+
+#-------------------------------------------
+
+# Dockerfile.local  — clean local-dev image (Debian-based)
 FROM python:3.11-slim
 
-# Setting working directory inside the container
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+# System deps needed by numpy/pandas/lightgbm
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    libgomp1 \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Copying dependency list
+# Install Python deps first for layer caching
 COPY requirements.txt .
+RUN pip install --upgrade pip \
+ && pip install -r requirements.txt
 
-# Installing dependencies
-# --no-cache-dir keeps image smaller
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copying all backend code into container
+# Copy app code + model files
 COPY . .
 
-# Exposing backend port for access from host
 EXPOSE 8088
-
-# Command to start FastAPI with Uvicorn
-# "app:app" → file_name:function_name inside app.py
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8088"]
+
