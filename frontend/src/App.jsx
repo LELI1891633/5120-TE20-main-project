@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { fetchBreaks, fetchStressSuggestion } from "./client";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -17,6 +18,7 @@ import BreathingGame from "./pages/BreathingGame";
 import BubblePopGame from "./pages/BubblePopGame";
 import WhackGame from "./pages/WhackGame";
 import SandGame from "./pages/SandGame";
+import TestConnection from "./pages/TestConnection";
 
 // Scroll to top component
 function ScrollToTop() {
@@ -39,6 +41,26 @@ function ScrollToTop() {
 }
 
 function App() {
+
+
+    const [testBreaks, setTestBreaks] = useState([]);
+  const [testSuggestion, setTestSuggestion] = useState(null);
+
+  useEffect(() => {
+    async function testConnection() {
+      try {
+        const b = await fetchBreaks();
+        const s = await fetchStressSuggestion();
+        setTestBreaks(b);
+        setTestSuggestion(s);
+        console.log(" Backend connection successful:", { breaks: b.length, suggestion: s });
+      } catch (err) {
+        console.error(" Backend connection failed:", err);
+      }
+    }
+    testConnection();
+  }, []);
+
   const [hydrationOpen, setHydrationOpen] = useState(false);
   const [hydrationMsg, setHydrationMsg] = useState("Time for a glass of water, stay hydrated!");
   const [snoozedUntil, setSnoozedUntil] = useState(null);
@@ -94,12 +116,14 @@ function App() {
             <Route path="/stress-buster/bubbles" element={<BubblePopGame />} />
             <Route path="/stress-buster/whack" element={<WhackGame />} />
             <Route path="/stress-buster/sand" element={<SandGame />} />
+            <Route path="/test-connection" element={<TestConnection />} />
           </Routes>
         </main>
         <Footer />
       </div>
     </Router>
   );
+
 }
 
 export default App;

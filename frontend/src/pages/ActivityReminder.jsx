@@ -6,16 +6,16 @@ import {
 } from "lucide-react";
 import { AnimatedAssistant } from "../components/AnimatedAssistant";
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 // Local fallback (used if API fails)
-const FALLBACK_STEPS = [
-  { id: 1, title: "Neck & Shoulder Rolls", duration: 45, cue: "Roll shoulders back ×5, forward ×5. Gentle neck circles within a comfy range." },
-  { id: 2, title: "Seated Spinal Twist", duration: 45, cue: "Sit tall. Twist to the right holding the chair back. Breathe. Switch sides halfway." },
-  { id: 3, title: "Chair Squats", duration: 60, cue: "Stand up and sit down with control. Chest tall. Comfortable pace." },
-  { id: 4, title: "Wrist & Ankle Circles", duration: 45, cue: "Circle wrists ~20s, then ankles. Reverse direction halfway." },
-  { id: 5, title: "Box Breathing", duration: 45, cue: "In 4 • Hold 4 • Out 4 • Hold 4. Repeat calmly." }
-];
+// const FALLBACK_STEPS = [
+//   { id: 1, title: "Neck & Shoulder Rolls", duration: 45, cue: "Roll shoulders back ×5, forward ×5. Gentle neck circles within a comfy range." },
+//   { id: 2, title: "Seated Spinal Twist", duration: 45, cue: "Sit tall. Twist to the right holding the chair back. Breathe. Switch sides halfway." },
+//   { id: 3, title: "Chair Squats", duration: 60, cue: "Stand up and sit down with control. Chest tall. Comfortable pace." },
+//   { id: 4, title: "Wrist & Ankle Circles", duration: 45, cue: "Circle wrists ~20s, then ankles. Reverse direction halfway." },
+//   { id: 5, title: "Box Breathing", duration: 45, cue: "In 4 • Hold 4 • Out 4 • Hold 4. Repeat calmly." }
+// ];
 
 export default function ActivityReminder() {
   const navigate = useNavigate();
@@ -40,7 +40,9 @@ export default function ActivityReminder() {
     let ignore = false;
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/breaks`, { headers: { "Content-Type": "application/json" } });
+        const res = await fetch(`${API_BASE}/stretch/random-set`, {
+          headers: { "Content-Type": "application/json" },
+          });
         if (!res.ok) throw new Error(`API ${res.status}`);
         const data = await res.json();
 
