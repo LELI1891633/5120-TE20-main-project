@@ -23,7 +23,8 @@ async function fetchJSON(url, options = {}) {
 
 // Breaks
 export async function fetchBreaks() {
-  return fetchJSON(`${API_BASE_URL}/breaks`);
+  // return fetchJSON(`${API_BASE_URL}/breaks`);
+   return fetchJSON(`${API_BASE_URL}/stretch/random-set`);
 }
 
 
