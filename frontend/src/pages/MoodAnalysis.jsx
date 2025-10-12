@@ -1,99 +1,87 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Smile, Meh, Frown, Zap, Sparkles } from "lucide-react";
 
 export default function MoodAnalysis({ onBack }) {
   const [mood, setMood] = useState("");
-  const [bgColor, setBgColor] = useState("from-sky-50 to-indigo-50");
+  const [bgGradient, setBgGradient] = useState("from-sky-50 to-indigo-50");
   const [message, setMessage] = useState("");
 
+
+  
+
+  // Scroll to center whenever mood changes
+  useEffect(() => {
+    if (mood) {
+      window.scrollTo({
+        top: 200,
+        behavior: "smooth",
+      });
+    }
+  }, [mood]);
+
   const moods = [
-    { name: "Stressed", color: "from-rose-100 to-rose-200", icon: <Frown /> },
-    { name: "Low Mood", color: "from-blue-100 to-blue-200", icon: <Meh /> },
-    { name: "Energized", color: "from-yellow-100 to-yellow-200", icon: <Zap /> },
-    { name: "Neutral", color: "from-green-100 to-green-200", icon: <Smile /> },
+    { name: "Stressed", color: "from-rose-200 to-rose-400", icon: <Frown /> },
+    { name: "Low Mood", color: "from-blue-200 to-blue-400", icon: <Meh /> },
+    { name: "Energized", color: "from-yellow-200 to-yellow-400", icon: <Zap /> },
+    { name: "Neutral", color: "from-green-200 to-green-400", icon: <Smile /> },
   ];
 
   const handleMood = (m) => {
     setMood(m.name);
-    setBgColor(m.color);
-    setMessage(`Thanks for sharing — it's okay to feel ${m.name.toLowerCase()} today.`);
+    setBgGradient(m.color);
+    setMessage(`Thanks for sharing, it's okay to feel ${m.name.toLowerCase()} today.`);
   };
 
   const recommendations = {
     Stressed: [
-      {
-        text: "Play Stress Buster Game",
-        link: "/stress-buster",
-      },
-      {
-        text: "Try a Breathing Exercise",
-        link: "/breathing-game",
-      },
+      { text: "Play Stress Buster Game", link: "/stress-buster" },
+      { text: "Try Breathing Exercise", link: "/breathing-game" },
     ],
     "Low Mood": [
-      {
-        text: "Listen to a Mood-Boosting Playlist",
-        link: "/bubble-pop-game",
-      },
-      {
-        text: "Read Positivity Quotes",
-        link: "/healthy-you",
-      },
+      { text: "Pop Some Bubbles", link: "/bubble-pop-game" },
+      { text: "Read Positivity Tips", link: "/healthy-you" },
     ],
     Energized: [
-      {
-        text: "Track Hydration",
-        link: "/hydration-reminder",
-      },
-      {
-        text: "Stretch or Walk Break",
-        link: "/activity-reminder",
-      },
+      { text: "Track Hydration", link: "/hydration-reminder" },
+      { text: "Stretch or Walk Break", link: "/activity-reminder" },
     ],
     Neutral: [
-      {
-        text: "Check Well-being Insights",
-        link: "/healthy-you",
-      },
-      {
-        text: "Reflect on Gratitude List",
-        link: "/sand-game",
-      },
+      { text: "Explore Wellbeing Insights", link: "/healthy-you" },
+      { text: "Play Sand Game", link: "/sand-game" },
     ],
   };
 
   return (
     <div
-      className={`relative min-h-screen transition-all duration-700 bg-gradient-to-br ${bgColor} py-10 px-6 overflow-hidden`}
+      className={`relative min-h-screen transition-all duration-700 bg-gradient-to-br ${bgGradient} py-4 px-6 flex items-center justify-center overflow-hidden`}
     >
-      {/* Background visuals */}
-      <div className="absolute inset-0 pointer-events-none opacity-40">
-        <div className="absolute top-0 left-1/4 h-64 w-64 rounded-full bg-gradient-to-br from-purple-200 to-pink-200 blur-3xl animate-pulse" />
+      {/* Soft animated background */}
+      <div className="absolute inset-0 pointer-events-none opacity-30">
+        <div className="absolute top-0 left-1/4 h-64 w-64 rounded-full bg-gradient-to-br from-fuchsia-200 to-pink-200 blur-3xl animate-pulse" />
         <div className="absolute bottom-0 right-1/3 h-80 w-80 rounded-full bg-gradient-to-br from-blue-200 to-sky-200 blur-3xl animate-pulse" />
       </div>
 
-      {/* Main container */}
-      <div className="relative z-10 max-w-4xl mx-auto rounded-3xl border border-white/40 bg-white/30 p-8 shadow-xl backdrop-blur-md">
+      {/* Main content */}
+        <div className="relative z-10 w-full max-w-4xl rounded-3xl border border-white/40 bg-white/40 p-6 shadow-2xl backdrop-blur-md mt-[-1rem]">
         {/* Back Button */}
         <button
           onClick={() => {
             onBack();
             setMood("");
           }}
-          className="mb-6 inline-flex items-center gap-2 rounded-lg bg-white/30 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-white/40 transition-all"
+          className="mb-6 inline-flex items-center gap-2 rounded-lg bg-white/30 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-white/50 transition-all"
         >
           <ArrowLeft size={16} />
           Back
         </button>
 
-        {/* Header */}
+        {/* Title */}
         <div className="flex items-center justify-center mb-6">
           <Sparkles className="text-fuchsia-600 mr-2" />
-          <h2 className="text-3xl font-bold text-slate-800">
-            Mood Analysis
-          </h2>
+          <h2 className="text-3xl font-bold text-slate-800">Mood Analysis</h2>
         </div>
+
         <p className="text-center text-gray-700 mb-8">
           How are you feeling today? Select your current mood to receive
           supportive color themes and personalized recommendations.
@@ -115,7 +103,7 @@ export default function MoodAnalysis({ onBack }) {
           ))}
         </div>
 
-        {/* Recommendation Section */}
+        {/* Recommendations */}
         {mood && (
           <div className="bg-white rounded-2xl shadow p-6 border border-slate-100">
             <p className="font-medium text-gray-800 mb-2">{message}</p>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, Smile, Users, ArrowLeft } from "lucide-react";
 import MoodAnalysis from "./MoodAnalysis";
@@ -7,6 +7,21 @@ import ConnectionScore from "./ConnectionScore";
 export default function SocialWellbeing() {
   const navigate = useNavigate();
   const [view, setView] = useState("main");
+
+  // 👇 Smooth scroll when view changes
+  useEffect(() => {
+    if (view === "mood" || view === "connection") {
+      window.scrollTo({
+        top: 200, // scrolls down to center the component nicely
+        behavior: "smooth",
+      });
+    } else if (view === "main") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [view]);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-sky-50 via-indigo-50 to-blue-50 py-6 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -17,7 +32,7 @@ export default function SocialWellbeing() {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 mx-auto mb-8 max-w-4xl">
+      <div className="relative z-10 mx-auto max-w-4xl space-y-4 mt-[-1rem]">
         <div className="mb-6 flex items-center gap-4">
           <button
             onClick={() => navigate("/healthy-you")}
