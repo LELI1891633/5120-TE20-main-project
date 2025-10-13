@@ -99,8 +99,8 @@ export default function StressBuster() {
           <Card
             gradient="from-purple-500 to-fuchsia-500"
             icon={<Flower2 size={18} />}
-            title="Sandspiel (Sandbox)"
-            subtitle="A soothing falling-sand simulation — opens full page."
+            title="Particle Trail Relaxation"
+            subtitle="Move your mouse to create colorful particle trails. Click for bursts!"
             onPlay={() => navigate("/stress-buster/sand")}
           />
         </div>

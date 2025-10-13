@@ -22,6 +22,9 @@ import TestConnection from "./pages/TestConnection";
 import SocialWellbeing from "./pages/SocialWellbeing";
 
 import DailyPlanner from "./pages/DailyPlanner";
+import WeeklyPlanner from "./pages/WeeklyPlanner";
+import MonthlyPlanner from "./pages/MonthlyPlanner";
+import PlannerHub from "./pages/PlannerHub";
 
 // Scroll to top component
 function ScrollToTop() {
@@ -121,7 +124,10 @@ function App() {
             <Route path="/stress-buster/sand" element={<SandGame />} />
             <Route path="/test-connection" element={<TestConnection />} />
             <Route path="/social-wellbeing" element={<SocialWellbeing/>} />
+            <Route path="/planner" element={<PlannerHub />} />
             <Route path="/daily-planner" element={<DailyPlanner />} />
+            <Route path="/weekly-planner" element={<WeeklyPlanner />} />
+            <Route path="/monthly-planner" element={<MonthlyPlanner />} />
           </Routes>
         </main>
         <Footer />

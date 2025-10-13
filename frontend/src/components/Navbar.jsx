@@ -11,7 +11,7 @@ const Navbar = () => {
     { to: "/healthy", label: "Healthy Space", icon: Heart },
     { to: "/health-info", label: "Health Info", icon: Info },
     { to: "/stress-buster", label: "Stress Buster Game", icon: Gamepad2 },
-    { to: "/daily-planner", label: "Daily Planner", icon: Calendar },
+    { to: "/planner", label: "Planner", icon: Calendar },
   ];
 
   return (
