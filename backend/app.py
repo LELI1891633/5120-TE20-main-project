@@ -204,6 +204,41 @@ def volunteering_trend(db: Session = Depends(get_db)):
     return [dict(r) for r in rows]
 
 
+@app.get("/social-contact-trend")
+def social_contact_trend(db: Session = Depends(get_db)):
+    """
+    Returns yearly average social contact score for all age groups.
+    Output format is a list of records grouped by year:
+    [{ year: 2001, "15–24": 5.4, "25–34": 5.1, "35–44": 5.0, ... }]
+    """
+    try:
+        rows = db.execute(text("""
+            SELECT Year, Age_group, AVG(Value) AS Value
+            FROM OfficeEase.it3_social_connection_insights
+            WHERE Metric = 'Average_social_contact'
+              AND Sex = 'All'
+            GROUP BY Year, Age_group
+            ORDER BY Year ASC
+        """)).mappings().all()
+
+        if not rows:
+            raise HTTPException(404, "No social contact data found")
+
+        # Transform to pivot-style data (each age group becomes a key)
+        grouped = {}
+        for r in rows:
+            y = int(r["Year"])
+            if y not in grouped:
+                grouped[y] = {"year": y}
+            grouped[y][r["Age_group"]] = float(r["Value"])
+
+        return list(grouped.values())
+
+    except Exception as e:
+        logger.exception("Error fetching social contact trend")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ---------- Eye Health: schema ----------
 from pydantic import BaseModel, field_validator
 
