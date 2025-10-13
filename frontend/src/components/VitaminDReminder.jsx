@@ -324,10 +324,17 @@ const VitaminDReminder = () => {
         {/* Timer Section - Only show after clicking reminder */}
         {showTimerCard && (
           <div className="bg-white/20 backdrop-blur-md rounded-3xl shadow-xl border border-white/30 p-8 fade-in">
-          <div className="flex items-center gap-3 mb-6">
+         <div className="flex items-center gap-3 mb-3">
             <Timer className="text-orange-600" size={24} />
-            <h2 className="text-2xl font-bold text-slate-800">Outdoor Time Timer</h2>
+            <h2 className="text-2xl font-bold text-slate-800">
+              Break & Sunshine Reminder
+            </h2>
           </div>
+
+          <p className="text-slate-600 text-sm mb-6 leading-relaxed">
+            Set a time to step away from your desk, get some fresh air, 
+            check the weather, and apply sunscreen before heading out.
+            </p>
           
           <div className="text-center">
             <div className="text-6xl font-mono font-bold text-slate-800 mb-4">
@@ -396,7 +403,8 @@ const VitaminDReminder = () => {
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="text-red-600 w-5 h-5" />
                   <span className="text-red-800 font-medium">
-                    Time's up! Time to get some Vitamin D! ☀️
+                     Time’s up! Take a short outdoor break and enjoy some sunshine ☀️  
+                     Don’t forget sunscreen if it’s bright out!
                   </span>
                 </div>
               </div>

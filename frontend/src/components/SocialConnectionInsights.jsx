@@ -232,7 +232,7 @@ export default function SocialTrendsCarousel() {
             <div className="w-full h-[340px] flex items-center justify-center">
               {chartData && chartData.length > 0
                 ? current.chart(chartData)
-                : <p className="text-slate-400 italic">Loading or no data available...</p>}
+                : <p className="text-slate-400 italic">Loading data...</p>}
             </div>
 
             <p className="text-sm text-slate-500 italic mt-6">
