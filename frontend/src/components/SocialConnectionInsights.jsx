@@ -11,7 +11,7 @@ import {
   Legend,
 } from "recharts";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8163";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8088";
 
 export default function SocialTrendsCarousel() {
   const [index, setIndex] = useState(0);
