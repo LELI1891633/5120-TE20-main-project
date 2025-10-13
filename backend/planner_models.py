@@ -40,3 +40,5 @@ class PlannerTemplate(BaseModel):
     description: str
     color: str
     layout: Dict
+
+

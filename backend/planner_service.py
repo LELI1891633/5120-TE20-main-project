@@ -142,3 +142,5 @@ class PlannerService:
                 "color": "from-green-500 to-emerald-600"
             }
         ]
+
+
