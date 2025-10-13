@@ -15,6 +15,20 @@ import {
 } from "lucide-react";
 import { AnimatedAssistant } from "../components/AnimatedAssistant";
 
+// Accept values from the UI and normalize to the labels the API expects.
+const normalizeGender = (g) => {
+  if (!g) return "Other/Unsp";
+  const s = String(g).toLowerCase();
+  if (s === "male") return "Male";
+  if (s === "female") return "Female";
+  // "Prefer not to say" or anything else → the model's actual label
+  return "Other/Unsp";
+};
+
+
+
+const labelMap = { "0": "Low", "1": "Medium", "2": "High" };
+
 const EyeHealthAnalysis = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -177,40 +191,52 @@ const EyeHealthAnalysis = () => {
 
 
   const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      // Convert frontend data to FastAPI format
-      const requestData = {
-        age: parseInt(formData.ageGroup.split('–')[0]) + 5, // Convert age group to approximate age
-        gender: formData.sex,
-        screen_time_hours: formData.screenTime,
-        physical_activity_hours: getPhysicalActivityHours(formData.physicalActivity)
-      };
+  setIsLoading(true);
+  try {
+    // Convert UI → API payload
+   const requestData = {
+      age: parseInt(formData.ageGroup.split('–')[0], 10) + 5,
+      gender: normalizeGender(formData.sex),  // <-- important
+      screen_time_hours: Number(formData.screenTime),
+      physical_activity_hours: getPhysicalActivityHours(formData.physicalActivity),
+   };
 
-      const result = await request('/api/eye-health/analyze', {
-        method: 'POST',
-        body: JSON.stringify(requestData)
-      });
-      
-      // Convert FastAPI response to frontend expected format
-      const convertedResult = {
-        eye_risk: (result.risk_level + 1) * 25, // Convert 0,1,2 to 25,50,75
-        risk_level: result.risk_level_name,
-        confidence: result.confidence > 0.8 ? 'High' : result.confidence > 0.6 ? 'Medium' : 'Low',
-        recommendations: result.recommendations,
-        screen_time_impact: `Your screen time of ${requestData.screen_time_hours} hours/day is ${result.risk_level_name.toLowerCase()} risk`
-      };
+   console.table(requestData);
+    // If your request() helper already prefixes API_BASE, use "/eye/assess".
+    // If not, use `${API_BASE}/eye/assess`.
+   const apiResp = await request('/eye/assess', {
+      method: 'POST',
+      body: JSON.stringify(requestData),
+   });
 
-      setAnalysisResult(convertedResult);
-      setCurrentStep(2);
-      
-    } catch (error) {
-      console.error('Analysis error:', error);
-      alert('Analysis failed, please try again later');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // Map API → UI model
+  
+    const predKey = String(apiResp.predicted_class);
+    const probs = apiResp.probabilities || {};
+    const topPct = Math.round((Number(probs[predKey] || 0) * 100) * 10) / 10; // e.g., 99.9
+
+    const convertedResult = {
+      eye_risk: topPct,                    // show model confidence as %
+      risk_level: labelMap[predKey] || predKey,
+      confidence: topPct >= 80 ? "High" : topPct >= 60 ? "Medium" : "Low",
+      recommendations: [
+        "Follow the 20-20-20 rule: every 20 minutes, look 20 feet away for 20 seconds.",
+        "Keep your monitor 50–70 cm from your eyes and match brightness to the room.",
+        "Aim for 60–120 minutes of outdoor daylight and regular movement breaks.",
+      ],
+      screen_time_impact: `Your screen time of ${requestData.screen_time_hours} hours/day is associated with a ${labelMap[predKey]?.toLowerCase() || "unknown"} risk.`,
+    };
+
+    setAnalysisResult(convertedResult);
+    setCurrentStep(2);
+  } catch (error) {
+    console.error("Analysis error:", error);
+    alert("Analysis failed, please try again later");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Helper function to convert physical activity level to hours
   const getPhysicalActivityHours = (activity) => {

@@ -36,6 +36,9 @@ export default function HydrationReminder() {
   const [customMessage, setCustomMessage] = useState("");
   const [nextAt, setNextAt] = useState(null);
   const [inputErrors, setInputErrors] = useState({});
+  const [rawIntervalInput, setRawIntervalInput] = useState("120");
+  const [rawOfficeStartInput, setRawOfficeStartInput] = useState("9");
+  const [rawOfficeEndInput, setRawOfficeEndInput] = useState("17");
   const timerRef = useRef(null);
   const bc = useRef(null);
 
@@ -67,6 +70,11 @@ export default function HydrationReminder() {
         setWeekdaysOnly(s.weekdaysOnly ?? true);
         setCustomMessage(s.customMessage ?? "");
         setNextAt(s.nextAt ?? null);
+        
+        // Update raw input states
+        setRawIntervalInput(validatedInterval.toString());
+        setRawOfficeStartInput(validatedStart.toString());
+        setRawOfficeEndInput(validatedEnd.toString());
         
         // Settings loaded successfully
       }
@@ -280,8 +288,24 @@ export default function HydrationReminder() {
 
   const handleIntervalChange = (e) => {
     const value = e.target.value;
+    // Allow empty input for deletion
+    if (value === '') {
+      setRawIntervalInput('');
+      return;
+    }
+    // Check if it's a valid number and not exceeding max
+    const num = Number(value);
+    if (!isNaN(num) && num <= 1440) {
+      setRawIntervalInput(value);
+    }
+    // If it exceeds 1440, don't update the input
+  };
+
+  const handleIntervalBlur = () => {
+    const value = rawIntervalInput;
     if (value === '') {
       setIntervalMins(120);
+      setRawIntervalInput("120");
       setInputErrors(prev => ({ ...prev, interval: null }));
       return;
     }
@@ -292,13 +316,34 @@ export default function HydrationReminder() {
     }
     const validated = validateInterval(value);
     setIntervalMins(validated);
+    setRawIntervalInput(validated.toString());
+    setInputErrors(prev => ({ ...prev, interval: null }));
+  };
+
+  const handleIntervalFocus = () => {
     setInputErrors(prev => ({ ...prev, interval: null }));
   };
 
   const handleOfficeStartChange = (e) => {
     const value = e.target.value;
+    // Allow empty input for deletion
+    if (value === '') {
+      setRawOfficeStartInput('');
+      return;
+    }
+    // Check if it's a valid number and within 0-23 range
+    const num = Number(value);
+    if (!isNaN(num) && num >= 0 && num <= 23) {
+      setRawOfficeStartInput(value);
+    }
+    // If it's outside range, don't update the input
+  };
+
+  const handleOfficeStartBlur = () => {
+    const value = rawOfficeStartInput;
     if (value === '') {
       setOfficeStart(9);
+      setRawOfficeStartInput("9");
       setInputErrors(prev => ({ ...prev, officeStart: null }));
       return;
     }
@@ -309,13 +354,34 @@ export default function HydrationReminder() {
     }
     const validated = validateHour(value);
     setOfficeStart(validated);
+    setRawOfficeStartInput(validated.toString());
+    setInputErrors(prev => ({ ...prev, officeStart: null }));
+  };
+
+  const handleOfficeStartFocus = () => {
     setInputErrors(prev => ({ ...prev, officeStart: null }));
   };
 
   const handleOfficeEndChange = (e) => {
     const value = e.target.value;
+    // Allow empty input for deletion
+    if (value === '') {
+      setRawOfficeEndInput('');
+      return;
+    }
+    // Check if it's a valid number and within 0-23 range
+    const num = Number(value);
+    if (!isNaN(num) && num >= 0 && num <= 23) {
+      setRawOfficeEndInput(value);
+    }
+    // If it's outside range, don't update the input
+  };
+
+  const handleOfficeEndBlur = () => {
+    const value = rawOfficeEndInput;
     if (value === '') {
       setOfficeEnd(17);
+      setRawOfficeEndInput("17");
       setInputErrors(prev => ({ ...prev, officeEnd: null }));
       return;
     }
@@ -326,14 +392,31 @@ export default function HydrationReminder() {
     }
     const validated = validateHour(value);
     setOfficeEnd(validated);
+    setRawOfficeEndInput(validated.toString());
+    setInputErrors(prev => ({ ...prev, officeEnd: null }));
+  };
+
+  const handleOfficeEndFocus = () => {
     setInputErrors(prev => ({ ...prev, officeEnd: null }));
   };
 
   // Preset buttons (satisfy AC2: fixed intervals + office hours)
   const applyPreset = (mins, start = 9, end = 17) => {
-    setIntervalMins(validateInterval(mins));
-    setOfficeStart(validateHour(start));
-    setOfficeEnd(validateHour(end));
+    const validatedMins = validateInterval(mins);
+    const validatedStart = validateHour(start);
+    const validatedEnd = validateHour(end);
+    
+    setIntervalMins(validatedMins);
+    setOfficeStart(validatedStart);
+    setOfficeEnd(validatedEnd);
+    
+    // Update raw input states
+    setRawIntervalInput(validatedMins.toString());
+    setRawOfficeStartInput(validatedStart.toString());
+    setRawOfficeEndInput(validatedEnd.toString());
+    
+    // Clear any errors
+    setInputErrors({});
   };
 
   return (
@@ -401,13 +484,20 @@ export default function HydrationReminder() {
                 min={15}
                 max={1440}
                 step={15}
-                value={intervalMins}
+                value={rawIntervalInput}
                 onChange={handleIntervalChange}
+                onBlur={handleIntervalBlur}
+                onFocus={handleIntervalFocus}
                 className={`w-full rounded-lg border px-3 py-2 text-base sm:text-sm ${
                   inputErrors.interval ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
+                style={{
+                  MozAppearance: 'textfield',
+                  WebkitAppearance: 'none'
+                }}
                 aria-describedby="interval-help"
                 placeholder="120"
+                noValidate
               />
               {/* Fixed height container to prevent layout shift */}
               <div className="mt-1 h-5 flex items-start">
@@ -430,23 +520,21 @@ export default function HydrationReminder() {
                     type="number"
                     min={0}
                     max={23}
-                    value={officeStart}
+                    value={rawOfficeStartInput}
                     onChange={handleOfficeStartChange}
+                    onBlur={handleOfficeStartBlur}
+                    onFocus={handleOfficeStartFocus}
                     className={`w-20 rounded-lg border px-3 py-2 text-base sm:text-sm ${
-                      inputErrors.officeStart ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                      (inputErrors.officeStart || inputErrors.officeEnd) ? 'border-red-300 bg-red-50' : 'border-gray-300'
                     }`}
+                    style={{
+                      MozAppearance: 'textfield',
+                      WebkitAppearance: 'none'
+                    }}
                     aria-label="Start hour"
                     placeholder="9"
+                    noValidate
                   />
-                  {/* Fixed height container to prevent layout shift */}
-                  <div className="mt-1 h-4 flex items-start">
-                    {inputErrors.officeStart && (
-                      <div className="flex items-center gap-1 text-xs text-red-600">
-                        <AlertTriangle size={10} />
-                        <span className="truncate">{inputErrors.officeStart}</span>
-                      </div>
-                    )}
-                  </div>
                 </div>
                 <span className="text-sm mt-2">to</span>
                 <div className="flex flex-col">
@@ -454,28 +542,31 @@ export default function HydrationReminder() {
                     type="number"
                     min={0}
                     max={23}
-                    value={officeEnd}
+                    value={rawOfficeEndInput}
                     onChange={handleOfficeEndChange}
+                    onBlur={handleOfficeEndBlur}
+                    onFocus={handleOfficeEndFocus}
                     className={`w-20 rounded-lg border px-3 py-2 text-base sm:text-sm ${
-                      inputErrors.officeEnd ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                      (inputErrors.officeStart || inputErrors.officeEnd) ? 'border-red-300 bg-red-50' : 'border-gray-300'
                     }`}
+                    style={{
+                      MozAppearance: 'textfield',
+                      WebkitAppearance: 'none'
+                    }}
                     aria-label="End hour"
                     placeholder="17"
+                    noValidate
                   />
-                  {/* Fixed height container to prevent layout shift */}
-                  <div className="mt-1 h-4 flex items-start">
-                    {inputErrors.officeEnd && (
-                      <div className="flex items-center gap-1 text-xs text-red-600">
-                        <AlertTriangle size={10} />
-                        <span className="truncate">{inputErrors.officeEnd}</span>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
-              {/* Fixed height container for help text */}
-              <div className="mt-2 h-4 flex items-start">
-                {!inputErrors.officeStart && !inputErrors.officeEnd && (
+              {/* Fixed height container for help text or error message */}
+              <div className="mt-2 h-5 flex items-start">
+                {(inputErrors.officeStart || inputErrors.officeEnd) ? (
+                  <div className="flex items-center gap-1 text-xs text-red-600">
+                    <AlertTriangle size={12} />
+                    {inputErrors.officeStart || inputErrors.officeEnd}
+                  </div>
+                ) : (
                   <p className="text-xs text-slate-500">0-23 hours (24-hour format). Example: 9 to 17 covers 9:00–17:00.</p>
                 )}
               </div>

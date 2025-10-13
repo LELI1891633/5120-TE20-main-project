@@ -60,7 +60,7 @@ const HealthyYou = () => {
     },
     {
       icon: Heart,
-      title: "Mental Wellness",
+      title: "Social Connection &  well-being",
       description: "Maintain your psychological health",
       tips: [
         "Practice deep breathing exercises",
@@ -210,55 +210,21 @@ const HealthyYou = () => {
                       <ArrowRight size={16} />
                     </button>
                   )}
+                  {title === "Social Connection &  well-being" && (
+                    <button
+                      onClick={() => navigate("/social-wellbeing")}
+                      className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                    >
+                      Explore More
+                      <ArrowRight size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Additional Resources */}
-        <section className="mt-16">
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-8 sm:p-12 text-center">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <Lightbulb className="text-sky-600" size={32} />
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800">Need More Guidance?</h2>
-            </div>
-            
-            <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              For comprehensive workplace health standards and official guidelines, 
-              visit our health information section with trusted government resources.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => navigate("/health-info")}
-                className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-medium px-8 py-4 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl"
-              >
-                <Info size={20} />
-                Official Guidelines
-                <ArrowRight size={16} />
-              </button>
-              
-              <button
-                onClick={() => navigate("/healthy-desk")}
-                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-8 py-4 rounded-xl border border-slate-200 transition-colors duration-200"
-              >
-                <Timer size={20} />
-                Assess Your Workspace
-                <ArrowRight size={16} />
-              </button>
-
-              <button
-                onClick={() => navigate("/hydration-reminder")}
-                className="inline-flex items-center gap-2 bg-sky-50 hover:bg-sky-100 text-sky-700 font-medium px-8 py-4 rounded-xl border border-sky-200 transition-colors duration-200"
-              >
-                <Droplet size={20} />
-                Hydration Reminder
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Animated Assistant */}
