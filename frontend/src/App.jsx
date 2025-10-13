@@ -18,7 +18,7 @@ import BreathingGame from "./pages/BreathingGame";
 import BubblePopGame from "./pages/BubblePopGame";
 import WhackGame from "./pages/WhackGame";
 import SandGame from "./pages/SandGame";
-import TestConnection from "./pages/TestConnection";
+
 
 // Scroll to top component
 function ScrollToTop() {
@@ -116,7 +116,7 @@ function App() {
             <Route path="/stress-buster/bubbles" element={<BubblePopGame />} />
             <Route path="/stress-buster/whack" element={<WhackGame />} />
             <Route path="/stress-buster/sand" element={<SandGame />} />
-            <Route path="/test-connection" element={<TestConnection />} />
+            
           </Routes>
         </main>
         <Footer />
