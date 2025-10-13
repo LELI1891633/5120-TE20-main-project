@@ -124,17 +124,7 @@ const HealthyYou = () => {
             Take care of your body and mind while working.
           </p>
           
-          {/* Quick Info Button */}
-          <div className="mt-6">
-            <button
-              onClick={() => navigate("/health-info")}
-              className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-medium px-6 py-3 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl"
-            >
-              <Info size={20} />
-              Official Health Guidelines
-              <ArrowRight size={16} />
-            </button>
-          </div>
+          {/* Quick Info Button removed as requested */}
         </div>
       </header>
 
