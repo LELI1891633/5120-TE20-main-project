@@ -13,6 +13,12 @@ from sqlalchemy import text, select, func
 from sqlalchemy.orm import Session
 from db import get_db
 import logging
+from planner_models import PlannerRequest, PlannerResponse
+from planner_service import PlannerService
+from fastapi.responses import HTMLResponse, FileResponse
+from jinja2 import Environment, FileSystemLoader
+import weasyprint
+import tempfile
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -36,6 +42,12 @@ except Exception as e:
 
 # FastAPI + CORS
 app = FastAPI(title="OfficeEase Backend", version="2.0.0")
+
+# Initialize planner service
+planner_service = PlannerService()
+
+# Jinja2 environment for templates
+jinja_env = Environment(loader=FileSystemLoader('templates'))
 
 allowed_origins = os.getenv(
     "ALLOWED_ORIGINS",
@@ -202,6 +214,102 @@ def volunteering_trend(db: Session = Depends(get_db)):
     if not rows:
         raise HTTPException(404, "No volunteering data found")
     return [dict(r) for r in rows]
+
+
+# ------------- PLANNER MODULE ---------------
+
+@app.post("/planner/generate", response_model=PlannerResponse)
+def generate_planner(request: PlannerRequest):
+    """Generate a daily planner based on user input"""
+    try:
+        planner = planner_service.generate_planner(request)
+        return planner
+    except Exception as e:
+        logger.error(f"Error generating planner: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate planner")
+
+@app.get("/planner/templates")
+def get_planner_templates():
+    """Get available planner templates"""
+    try:
+        templates = planner_service.get_available_templates()
+        return {"templates": templates}
+    except Exception as e:
+        logger.error(f"Error getting templates: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get templates")
+
+@app.post("/planner/download")
+def download_planner(request: PlannerRequest, format: str = "pdf"):
+    """Generate and download planner in specified format"""
+    try:
+        # Generate planner
+        planner = planner_service.generate_planner(request)
+        
+        if format.lower() == "pdf":
+            return download_planner_pdf(planner)
+        elif format.lower() == "html":
+            return download_planner_html(planner)
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported format. Use 'pdf' or 'html'")
+            
+    except Exception as e:
+        logger.error(f"Error downloading planner: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to download planner")
+
+def download_planner_pdf(planner: PlannerResponse):
+    """Generate PDF from planner data"""
+    try:
+        # Render HTML template
+        template = jinja_env.get_template('planner_template.html')
+        html_content = template.render(
+            date=planner.date,
+            work_hours=planner.work_hours,
+            tasks=planner.tasks,
+            breaks=planner.breaks,
+            wellbeing=planner.wellbeing
+        )
+        
+        # Generate PDF
+        pdf_bytes = weasyprint.HTML(string=html_content).write_pdf()
+        
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            tmp_file.write(pdf_bytes)
+            tmp_file_path = tmp_file.name
+        
+        # Return file response
+        return FileResponse(
+            tmp_file_path,
+            media_type='application/pdf',
+            filename=f'daily-planner-{planner.planner_id}.pdf',
+            headers={"Content-Disposition": f"attachment; filename=daily-planner-{planner.planner_id}.pdf"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating PDF: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate PDF")
+
+def download_planner_html(planner: PlannerResponse):
+    """Generate HTML from planner data"""
+    try:
+        # Render HTML template
+        template = jinja_env.get_template('planner_template.html')
+        html_content = template.render(
+            date=planner.date,
+            work_hours=planner.work_hours,
+            tasks=planner.tasks,
+            breaks=planner.breaks,
+            wellbeing=planner.wellbeing
+        )
+        
+        return HTMLResponse(
+            content=html_content,
+            headers={"Content-Disposition": f"attachment; filename=daily-planner-{planner.planner_id}.html"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating HTML: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate HTML")
 
 
 @app.get("/social-contact-trend")
