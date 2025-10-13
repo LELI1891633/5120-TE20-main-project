@@ -15,21 +15,20 @@ import {
 } from "lucide-react";
 import { AnimatedAssistant } from "./AnimatedAssistant";
 
-const CLASS_LABELS = { "0": "Low", "1": "Medium", "2": "High" };
-
-
-const EyeHealthAnalysis = ({
-  formData,
-   onChange,
-   onSubmit,
-   isLoading,
-   analysisResult,
-   currentStep,
-   setCurrentStep,
- }) => {
+const EyeHealthAnalysis = () => {
   const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
   const [assistantOpen, setAssistantOpen] = useState(true);
-  
+  const [formData, setFormData] = useState({
+    ageGroup: "",
+    sex: "",
+    screenTime: 8,
+    physicalActivity: "",
+    state: "NSW",
+    remotenessArea: "Major Cities"
+  });
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
   const [timerMinutes, setTimerMinutes] = useState(20);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -72,7 +71,12 @@ const EyeHealthAnalysis = ({
     return getRandomRecommendations();
   }, [analysisResult]);
 
-  const handleInputChange = (field, value) => onChange(field, value);
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleReminderClick = () => {
     setShowReminder(true);
@@ -172,8 +176,41 @@ const EyeHealthAnalysis = ({
   };
 
 
- 
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      // Convert frontend data to FastAPI format
+      const requestData = {
+        age: parseInt(formData.ageGroup.split('–')[0]) + 5, // Convert age group to approximate age
+        gender: formData.sex,
+        screen_time_hours: formData.screenTime,
+        physical_activity_hours: getPhysicalActivityHours(formData.physicalActivity)
+      };
 
+      const result = await request('/api/eye-health/analyze', {
+        method: 'POST',
+        body: JSON.stringify(requestData)
+      });
+      
+      // Convert FastAPI response to frontend expected format
+      const convertedResult = {
+        eye_risk: (result.risk_level + 1) * 25, // Convert 0,1,2 to 25,50,75
+        risk_level: result.risk_level_name,
+        confidence: result.confidence > 0.8 ? 'High' : result.confidence > 0.6 ? 'Medium' : 'Low',
+        recommendations: result.recommendations,
+        screen_time_impact: `Your screen time of ${requestData.screen_time_hours} hours/day is ${result.risk_level_name.toLowerCase()} risk`
+      };
+
+      setAnalysisResult(convertedResult);
+      setCurrentStep(2);
+      
+    } catch (error) {
+      console.error('Analysis error:', error);
+      alert('Analysis failed, please try again later');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Helper function to convert physical activity level to hours
   const getPhysicalActivityHours = (activity) => {
@@ -548,7 +585,8 @@ const EyeHealthAnalysis = ({
     </div>
   );
 
-  const isStep1Valid = formData?.ageGroup && formData?.sex && formData?.physicalActivity && formData?.screenTime !== null;
+  const isStep1Valid = formData.ageGroup && formData.sex && formData.physicalActivity && formData.screenTime !== null;
+
   return (
     <>
     <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-sky-50 py-6 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -639,7 +677,7 @@ const EyeHealthAnalysis = ({
         {currentStep === 1 && (
           <div className="flex justify-center mt-4">
             <button
-              onClick={onSubmit}
+              onClick={handleSubmit}
               disabled={!isStep1Valid || isLoading}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >

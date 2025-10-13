@@ -2,7 +2,6 @@
 # SQLAlchemy ORM models aligned with AWS RDS schema
 
 
-import joblib
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text, DECIMAL, SmallInteger
 
@@ -143,4 +142,3 @@ class VolunteeringTrend(Base):
     year: Mapped[int] = mapped_column(Integer, primary_key=True)
     voluntary_work_through_an_organisation: Mapped[float] = mapped_column(DECIMAL(5, 2))
     informal_volunteering: Mapped[float] = mapped_column(DECIMAL(5, 2))
-

@@ -30,6 +30,4 @@ boto3==1.34.131
 weasyprint==60.2
 jinja2==3.1.2
 reportlab==4.0.7
-lightgbm==4.1.0
-scikit-learn==1.4.2
 
