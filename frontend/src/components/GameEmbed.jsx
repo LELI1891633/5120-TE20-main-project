@@ -13,16 +13,17 @@ export default function GameEmbed({ src, title, ratio = "56.25%" /* 16:9 */, hei
   }, [loaded]);
 
   return (
-    <div className="rounded-2xl border bg-white shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3 border-b">
-        <h2 className="text-base font-semibold">{title || "Game"}</h2>
-        <div className="flex items-center gap-2">
+    <div className="rounded-xl sm:rounded-2xl border bg-white shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 border-b">
+        <h2 className="text-sm sm:text-base font-semibold truncate pr-2">{title || "Game"}</h2>
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <button
             onClick={() => iframeRef.current?.requestFullscreen?.()}
-            className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-sm hover:bg-slate-50"
+            className="inline-flex items-center gap-1 rounded-lg border px-1 sm:px-2 py-1 text-xs sm:text-sm hover:bg-slate-50"
             title="Fullscreen"
           >
-            <Maximize2 size={16} /> Fullscreen
+            <Maximize2 size={14} className="sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Fullscreen</span>
           </button>
           <button
             onClick={() => {
@@ -34,10 +35,11 @@ export default function GameEmbed({ src, title, ratio = "56.25%" /* 16:9 */, hei
                 iframeRef.current.src = u.toString();
               }
             }}
-            className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-sm hover:bg-slate-50"
+            className="inline-flex items-center gap-1 rounded-lg border px-1 sm:px-2 py-1 text-xs sm:text-sm hover:bg-slate-50"
             title="Reload"
           >
-            <RotateCcw size={16} /> Reload
+            <RotateCcw size={14} className="sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Reload</span>
           </button>
         </div>
       </div>
@@ -45,22 +47,22 @@ export default function GameEmbed({ src, title, ratio = "56.25%" /* 16:9 */, hei
       <div className="relative w-full" style={{ paddingTop: ratio, minHeight: height }}>
         {!loaded && !failed && (
           <div className="absolute inset-0 grid place-items-center bg-slate-50">
-            <div className="w-72">
+            <div className="w-64 sm:w-72 px-4">
               <div className="h-2 w-full bg-slate-200 rounded overflow-hidden">
                 <div className="h-2 w-1/3 animate-pulse bg-slate-400 rounded" />
               </div>
-              <p className="mt-3 text-sm text-slate-600 text-center">Loading game…</p>
+              <p className="mt-3 text-xs sm:text-sm text-slate-600 text-center">Loading game…</p>
             </div>
           </div>
         )}
 
         {failed && (
-          <div className="absolute inset-0 grid place-items-center bg-slate-50 p-6 text-center">
-            <div className="max-w-sm">
-              <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-rose-100 text-rose-700 grid place-items-center">
-                <AlertCircle size={18} />
+          <div className="absolute inset-0 grid place-items-center bg-slate-50 p-4 sm:p-6 text-center">
+            <div className="max-w-sm px-4">
+              <div className="mx-auto mb-2 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-rose-100 text-rose-700 grid place-items-center">
+                <AlertCircle size={16} className="sm:w-4 sm:h-4" />
               </div>
-              <p className="text-sm text-slate-700">
+              <p className="text-xs sm:text-sm text-slate-700">
                 Failed to load. The source may block iframes. Try reloading or self-hosting.
               </p>
             </div>
@@ -69,22 +71,22 @@ export default function GameEmbed({ src, title, ratio = "56.25%" /* 16:9 */, hei
 
         {/* Ad overlay - covers the left side where ads appear */}
         {loaded && !failed && (
-          <div className="absolute left-0 top-0 w-1/4 h-full bg-gradient-to-r from-sky-50 to-blue-50 border-r border-sky-200 z-10">
-            <div className="p-4 h-full flex flex-col justify-center">
+          <div className="absolute left-0 top-0 w-1/3 sm:w-1/4 md:w-1/3 lg:w-1/4 h-full bg-gradient-to-r from-sky-50 to-blue-50 border-r border-sky-200 z-10">
+            <div className="p-2 sm:p-3 md:p-4 h-full flex flex-col justify-center">
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 bg-sky-100 rounded-full flex items-center justify-center">
-                  <span className="text-sky-600 text-xl">🎮</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 mx-auto mb-2 sm:mb-3 bg-sky-100 rounded-full flex items-center justify-center">
+                  <span className="text-sky-600 text-sm sm:text-base md:text-xl">🎮</span>
                 </div>
-                <h3 className="text-lg font-semibold text-sky-800 mb-2">How to Play</h3>
-                <div className="text-sm text-sky-700 space-y-2 text-left">
-                  <p>• <strong>Select</strong> brush size (dots/squares)</p>
-                  <p>• <strong>Choose</strong> materials from the grid</p>
-                  <p>• <strong>Draw</strong> on the canvas to create</p>
-                  <p>• Try <strong>Sand + Water</strong> combinations</p>
-                  <p>• Plant <strong>Seeds</strong> to grow flowers</p>
-                  <p>• Use <strong>Wind</strong> to move particles</p>
+                <h3 className="text-sm sm:text-base md:text-lg font-semibold text-sky-800 mb-1 sm:mb-2">How to Play</h3>
+                <div className="text-xs sm:text-sm text-sky-700 space-y-1 sm:space-y-2 text-left">
+                  <p className="leading-tight">• <strong>Select</strong> brush size (dots/squares)</p>
+                  <p className="leading-tight">• <strong>Choose</strong> materials from the grid</p>
+                  <p className="leading-tight">• <strong>Draw</strong> on the canvas to create</p>
+                  <p className="leading-tight">• Try <strong>Sand + Water</strong> combinations</p>
+                  <p className="leading-tight">• Plant <strong>Seeds</strong> to grow flowers</p>
+                  <p className="leading-tight">• Use <strong>Wind</strong> to move particles</p>
                 </div>
-                <div className="mt-4 text-xs text-sky-600">
+                <div className="mt-2 sm:mt-4 text-xs text-sky-600">
                   <p>💡 Tip: Mix different materials to see interesting physics!</p>
                 </div>
               </div>

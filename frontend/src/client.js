@@ -9,17 +9,22 @@
 //  Base URL configuration
 //  Reads from environment variable if available
 //  Falls back to local backend for dev testing
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8088";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
 
 // Small helper to handle responses
 async function fetchJSON(url, options = {}) {
   const res = await fetch(url, options);
+  const ct = res.headers.get("content-type") || "";
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`API Error ${res.status}: ${err}`);
+    const text = await res.text();
+    throw new Error(`API Error ${res.status}: ${text}`);
   }
-  return await res.json();
+  if (!ct.includes("application/json")) {
+    throw new Error(`Unexpected content-type: ${ct}`);
+  }
+  return res.json();
 }
+
 
 // Breaks
 export async function fetchBreaks() {
@@ -31,6 +36,15 @@ export async function fetchBreaks() {
 
 //  OFFICEEZ API CALLS
 
+export async function assessEye(payload) {
+  const res = await fetch(`${API_BASE}/eye/assess`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
 
 // Health checks
 export async function checkHealth() {

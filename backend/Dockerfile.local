@@ -1,27 +1,31 @@
-# For LOCAL development and testing ONLY
+# ==============================
+# OfficeEase Backend Dockerfile
+# ==============================
 
-# This file builds a simple Python container
-# running FastAPI app using Uvicorn
+# 1. Use lightweight Python image
+FROM python:3.12-slim
 
-# Starting from a lightweight Python image
-FROM python:3.11-slim
-
-# Setting working directory inside the container
+# 2. Set working directory
 WORKDIR /app
 
-# Copying dependency list
+# 3. Copy dependency files first for caching
 COPY requirements.txt .
 
-# Installing dependencies
-# --no-cache-dir keeps image smaller
+# 4. Install system dependencies
+#    libgomp1 is required by LightGBM (for OpenMP parallelization)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libgomp1 && \
+    rm -rf /var/lib/apt/lists/*
+
+# 5. Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copying all backend code into container
+# 6. Copy all backend source code
 COPY . .
 
-# Exposing backend port for access from host
-EXPOSE 8088
+# 7. Expose backend port
+EXPOSE 8163
 
-# Command to start FastAPI with Uvicorn
-# "app:app" → file_name:function_name inside app.py
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8088"]
+# 8. Default command to run FastAPI app
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8163"]
+

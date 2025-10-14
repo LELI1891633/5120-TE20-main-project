@@ -127,7 +127,7 @@ export default function ActivityReminder() {
           >
             <ArrowLeft size={16} />
             Back to Health Tips
-          </button>1q 
+          </button>
         </div>
 
         <div className="text-center">

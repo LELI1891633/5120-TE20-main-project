@@ -18,7 +18,13 @@ import BreathingGame from "./pages/BreathingGame";
 import BubblePopGame from "./pages/BubblePopGame";
 import WhackGame from "./pages/WhackGame";
 import SandGame from "./pages/SandGame";
-import TestConnection from "./pages/TestConnection";
+
+import SocialWellbeing from "./pages/SocialWellbeing";
+
+import DailyPlanner from "./pages/DailyPlanner";
+import MonthlyPlanner from "./pages/MonthlyPlanner";
+import MonthlyWellbeing from "./pages/MonthlyWellbeing";
+import PlannerHub from "./pages/PlannerHub";
 
 // Scroll to top component
 function ScrollToTop() {
@@ -116,7 +122,12 @@ function App() {
             <Route path="/stress-buster/bubbles" element={<BubblePopGame />} />
             <Route path="/stress-buster/whack" element={<WhackGame />} />
             <Route path="/stress-buster/sand" element={<SandGame />} />
-            <Route path="/test-connection" element={<TestConnection />} />
+            
+            <Route path="/social-wellbeing" element={<SocialWellbeing/>} />
+            <Route path="/planner" element={<PlannerHub />} />
+            <Route path="/daily-planner" element={<DailyPlanner />} />
+            <Route path="/monthly-planner" element={<MonthlyPlanner />} />
+            <Route path="/monthly-wellbeing" element={<MonthlyWellbeing />} />
           </Routes>
         </main>
         <Footer />
