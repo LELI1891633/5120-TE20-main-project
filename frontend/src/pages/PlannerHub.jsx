@@ -24,15 +24,6 @@ const PlannerHub = () => {
       route: "/daily-planner"
     },
     {
-      id: "weekly",
-      title: "Weekly Planner",
-      description: "Organize your week with goals, deadlines, and progress tracking",
-      icon: CalendarDays,
-      color: "from-green-500 to-emerald-600",
-      features: ["Weekly Goals", "Deadline Tracking", "Progress Monitoring", "Week Overview"],
-      route: "/weekly-planner"
-    },
-    {
       id: "monthly",
       title: "Monthly Planner",
       description: "Strategic planning with long-term goals and milestone tracking",
@@ -40,6 +31,15 @@ const PlannerHub = () => {
       color: "from-purple-500 to-violet-600",
       features: ["Monthly Goals", "Milestone Tracking", "Strategic Planning", "Progress Analytics"],
       route: "/monthly-planner"
+    },
+    {
+      id: "monthly-wellbeing",
+      title: "Monthly + Wellbeing",
+      description: "Calendar with exercise/mindfulness chips and monthly summary",
+      icon: CalendarRange,
+      color: "from-blue-500 to-cyan-600",
+      features: ["Calendar", "Exercise / Mindfulness", "Month Summary"],
+      route: "/monthly-wellbeing"
     }
   ];
 
@@ -82,7 +82,7 @@ const PlannerHub = () => {
         </div>
 
         {/* Planner Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 max-w-6xl mx-auto justify-items-stretch">
           {plannerTypes.map((planner) => {
             const IconComponent = planner.icon;
             return (
@@ -181,4 +181,5 @@ const PlannerHub = () => {
 };
 
 export default PlannerHub;
+
 
