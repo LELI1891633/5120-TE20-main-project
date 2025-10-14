@@ -1,59 +1,31 @@
-# # For LOCAL development and testing ONLY
+# ==============================
+# OfficeEase Backend Dockerfile
+# ==============================
 
-# # This file builds a simple Python container
-# # running FastAPI app using Uvicorn
+# 1. Use lightweight Python image
+FROM python:3.12-slim
 
-# # Starting from a lightweight Python image
-# FROM python:3.11-slim
-
-# # Setting working directory inside the container
-# WORKDIR /app
-
-# # Copying dependency list
-# COPY requirements.txt .
-
-# # Installing dependencies
-# # --no-cache-dir keeps image smaller
-# RUN pip install --no-cache-dir -r requirements.txt
-
-# # Copying all backend code into container
-# COPY . .
-
-# # Exposing backend port for access from host
-# EXPOSE 8088
-
-# # Command to start FastAPI with Uvicorn
-# # "app:app" → file_name:function_name inside app.py
-# CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8088"]
-
-
-
-#-------------------------------------------
-
-# Dockerfile.local  — clean local-dev image (Debian-based)
-FROM python:3.11-slim
-
-ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
-
-# System deps needed by numpy/pandas/lightgbm
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    gcc \
-    g++ \
-    libgomp1 \
- && rm -rf /var/lib/apt/lists/*
-
+# 2. Set working directory
 WORKDIR /app
 
-# Install Python deps first for layer caching
+# 3. Copy dependency files first for caching
 COPY requirements.txt .
-RUN pip install --upgrade pip \
- && pip install -r requirements.txt
 
-# Copy app code + model files
+# 4. Install system dependencies
+#    libgomp1 is required by LightGBM (for OpenMP parallelization)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libgomp1 && \
+    rm -rf /var/lib/apt/lists/*
+
+# 5. Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 6. Copy all backend source code
 COPY . .
 
-EXPOSE 8088
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8088"]
+# 7. Expose backend port
+EXPOSE 8163
+
+# 8. Default command to run FastAPI app
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8163"]
 
