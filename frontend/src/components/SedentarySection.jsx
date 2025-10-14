@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -11,23 +11,54 @@ import {
 
 export default function SedentarySection() {
   const [activeMetric, setActiveMetric] = useState("Sitting");
+  const [distributionData, setDistributionData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
+  // Fetch real backend data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/activity/guidelines`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Transform backend keys to Recharts-friendly format
+        const formatted = data.map((d) => ({
+          age: d.age_group,
+          Sitting: d.percent_mostly_sitting,
+          Standing: d.percent_mostly_standing,
+          Walking: d.percent_mostly_walking,
+          "Physically Demanding": d.percent_physically_demanding,
+        }));
+
+        setDistributionData(formatted);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [API_BASE]);
 
   const metrics = [
-    { name: "Sitting", value: 45.2, color: "#ef4444",icon: "💺", desc: "Mostly sitting during workday" },
-    { name: "Standing", value: 19.4, color: "#de16bab1", icon: "🧍‍♀️", desc: "Mostly standing during workday" },
-    { name: "Walking", value: 21.4, color: "#22c55e", icon: "🚶‍♂️", desc: "Mostly walking during workday" },
-    { name: "Physically Demanding", value: 13.7, color: "#4c89ebff",icon: "💪", desc: "Physically demanding activities" },
-  ];
-
-  const distributionData = [
-    { age: "18–24", Sitting: 22.8, Standing: 18.5, Walking: 19.2, "Physically Demanding": 12.5 },
-    { age: "25–34", Sitting: 45.5, Standing: 20.2, Walking: 25.6, "Physically Demanding": 15.8 },
-    { age: "35–44", Sitting: 54.4, Standing: 23.0, Walking: 20.4, "Physically Demanding": 13.0 },
-    { age: "45–54", Sitting: 52.9, Standing: 19.1, Walking: 18.7, "Physically Demanding": 14.1 },
-    { age: "55–64", Sitting: 50.6, Standing: 16.9, Walking: 16.4, "Physically Demanding": 11.5 },
+    { name: "Sitting", color: "#ef4444", icon: "💺", desc: "Mostly sitting during workday" },
+    { name: "Standing", color: "#de16bab1", icon: "🧍‍♀️", desc: "Mostly standing during workday" },
+    { name: "Walking", color: "#22c55e", icon: "🚶‍♂️", desc: "Mostly walking during workday" },
+    { name: "Physically Demanding", color: "#4c89ebff", icon: "💪", desc: "Physically demanding activities" },
   ];
 
   const active = metrics.find((m) => m.name === activeMetric);
+
+  if (loading) return <div>Loading sedentary data...</div>;
+  if (error) return <div className="text-red-600">Error: {error}</div>;
+  if (!distributionData.length) return <div>No data available.</div>;
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -64,7 +95,7 @@ export default function SedentarySection() {
                 className="text-3xl font-bold mt-4"
                 style={{ color: m.color }}
               >
-                {m.value}%
+                
               </p>
             </div>
           </div>

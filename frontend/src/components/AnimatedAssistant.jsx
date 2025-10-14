@@ -126,13 +126,40 @@ export function AnimatedAssistant({
   }, [position]);
 
   const next = () => {
-    if (step < steps.length - 1) setStep((s) => s + 1);
-    else if (loop) setStep(0);
-    else { onFinish?.(); setCollapsed(true); }
-  };
+  if (step < steps.length - 1) setStep((s) => s + 1);
+  else if (loop) setStep(0);
+  else {
+    onFinish?.();
+    setCollapsed(true);
+  }
+};
+
+const prev = () => {
+  if (step > 0) setStep((s) => s - 1);
+};
+
+useEffect(() => {
+  if (visible && !collapsed) setStep(0);
+}, [visible, collapsed]);
+
 
   const collapse = () => { setCollapsed(true); setVisible(false); onClose?.(); };
   const expand = () => { setCollapsed(false); setVisible(true); };
+
+  // 🔔 Allow other components to open or update the assistant dynamically
+useEffect(() => {
+  const openHandler = (event) => {
+    const { steps: newSteps, name: newName } = event.detail || {};
+    if (newSteps) setStep(0);
+    if (newName) document.title = `${newName} - OfficeEz`; // optional
+    setCollapsed(false);
+    setVisible(true);
+  };
+  window.addEventListener("open-assistant", openHandler);
+  return () => window.removeEventListener("open-assistant", openHandler);
+}, []);
+
+
 
   return (
     <>
@@ -214,17 +241,29 @@ export function AnimatedAssistant({
                 </p>
 
                 <div className="mt-3 flex items-center justify-between">
-                  <div className="text-xs text-gray-500">
-                    Step {Math.min(step + 1, steps.length)} / {steps.length}
-                  </div>
+                <div className="text-xs text-gray-500">
+                  Step {step + 1} / {steps.length}
+                </div>
+
+                <div className="flex gap-2">
+                  {step > 0 && (
+                    <button
+                      onClick={prev}
+                      className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 shadow-sm transition-all"
+                    >
+                      ← Prev
+                    </button>
+                  )}
                   <button
                     onClick={next}
-                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm text-white shadow hover:opacity-95 bg-gradient-to-r ${ACCENT_MAP[accent]}`}
+                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm text-white shadow hover:opacity-95 bg-gradient-to-r ${ACCENT_MAP[accent]} transition-all`}
                   >
                     {step < steps.length - 1 ? "Next" : loop ? "Restart" : "Finish"}
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
+              </div>
+
               </Bubble>
             </div>
           </motion.div>

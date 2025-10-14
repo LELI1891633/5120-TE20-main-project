@@ -13,7 +13,8 @@ from sqlalchemy import text, select, func
 from sqlalchemy.orm import Session
 from db import get_db
 import logging
-from fastapi.responses import JSONResponse
+
+
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -38,7 +39,6 @@ except Exception as e:
 # FastAPI + CORS
 app = FastAPI(title="OfficeEase Backend", version="2.0.0")
 
- 
 
 
 allowed_origins = os.getenv(
@@ -127,20 +127,39 @@ def stretch_random_set(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @app.get("/guidelines")
-def guidelines_all(db: Session = Depends(get_db)):
+def get_activity_guidelines(db: Session = Depends(get_db)):
+    """
+    Returns activity guideline percentages for each age group.
+    """
     rows = db.execute(text("""
-        SELECT * FROM OfficeEase.it2_physical_guidelines
-        ORDER BY survey_year DESC, age_group
+        SELECT age_group,
+               percent_met_guidelines,
+               percent_150min_or_more,
+               percent_five_or_more_days_active,
+               percent_strength_toning_two_days,
+               survey_year
+        FROM OfficeEase.it2_physical_guidelines
+        WHERE survey_year = 2022
+        ORDER BY age_group
+    """)).mappings().all()
+
+    if not rows:
+        raise HTTPException(status_code=404, detail="No guideline data found")
+
+    return [dict(r) for r in rows]
+
+
+@app.get("/activity/guidelines")
+def get_guidelines(db: Session = Depends(get_db)):
+    rows = db.execute(text("""
+        SELECT age_group, percent_mostly_sitting, percent_mostly_standing,
+               percent_mostly_walking, percent_physically_demanding, survey_year
+        FROM OfficeEase.it2_workday_activity
+        WHERE survey_year = 2022
+        ORDER BY age_group
     """)).mappings().all()
     return [dict(r) for r in rows]
 
-@app.get("/workday")
-def workday_all(db: Session = Depends(get_db)):
-    rows = db.execute(text("""
-        SELECT * FROM OfficeEase.it2_workday_activity
-        ORDER BY survey_year DESC, age_group
-    """)).mappings().all()
-    return [dict(r) for r in rows]
 
 
 # ------------- IT3: SOCIAL CONNECTIONS MODULE ---------------
@@ -208,7 +227,7 @@ def volunteering_trend(db: Session = Depends(get_db)):
     return [dict(r) for r in rows]
 
 
-# ------------- PLANNER MODULE (removed; handled on frontend) ---------------
+
 
 
 @app.get("/social-contact-trend")
