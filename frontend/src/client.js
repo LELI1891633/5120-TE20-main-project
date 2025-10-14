@@ -9,7 +9,7 @@
 //  Base URL configuration
 //  Reads from environment variable if available
 //  Falls back to local backend for dev testing
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8088";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
 
 // Small helper to handle responses
 async function fetchJSON(url, options = {}) {
