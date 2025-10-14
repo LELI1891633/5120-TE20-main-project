@@ -64,7 +64,7 @@ export default function SocialWellbeing() {
           <div className="rounded-3xl border border-white/30 bg-white/20 p-8 shadow-xl backdrop-blur-md">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Mood Analysis */}
-              <div className="flex flex-col justify-between h-80 bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white p-6 rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all">
+              <div className="flex flex-col justify-between bg-gradient-to-br from-fuchsia-400 via-pink-500 to-rose-500 text-white p-8 rounded-3xl shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Smile className="text-white" />
