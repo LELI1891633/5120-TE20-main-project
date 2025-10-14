@@ -138,6 +138,26 @@ function ParticleTrailGame() {
     }
   };
 
+  // Touch support for mobile
+  const handleTouchMove = (e) => {
+    if (!isActive) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+      setMousePos({ x, y });
+      if (Math.random() < 0.9) {
+        createParticle(x + (Math.random() - 0.5) * 20, y + (Math.random() - 0.5) * 20);
+      }
+    }
+  };
+  const handleTouchStart = (e) => { setIsActive(true); handleTouchMove(e); };
+  const handleTouchEnd = () => { setIsActive(false); };
+
   const clearParticles = () => {
     setParticles([]);
     const canvas = canvasRef.current;
@@ -258,7 +278,10 @@ function ParticleTrailGame() {
             ref={canvasRef}
             onMouseMove={handleMouseMove}
             onClick={handleMouseClick}
-            className="w-full cursor-crosshair bg-gradient-to-b from-sky-100 to-blue-100"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className="w-full cursor-crosshair bg-gradient-to-b from-sky-100 to-blue-100 touch-none"
             style={{ 
               height: '400px',
               display: 'block',

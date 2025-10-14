@@ -1,527 +1,406 @@
-import React, { useState, useRef } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  CalendarRange, 
-  Clock, 
-  Download, 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  ArrowLeft,
-  Target,
-  TrendingUp,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
-  Calendar,
-  BarChart3,
-  Award
+  Flag,
+  Download,
+  Star,
+  Check,
+  Clock3,
+  Filter,
+  Link as LinkIcon,
+  HeartPulse,
+  ArrowLeft
 } from "lucide-react";
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const CATEGORIES = [
+  { key: "project", label: "Project", color: "#2563eb" },
+  { key: "finance", label: "Finance", color: "#16a34a" },
+  { key: "ops", label: "Ops", color: "#f59e0b" },
+  { key: "hr", label: "HR", color: "#ef4444" },
+  { key: "other", label: "Other", color: "#6b7280" },
+];
+const PRIORITIES = ["P1", "P2", "P3"];
+const STATUSES = ["Planned", "In Progress", "Blocked", "Done"];
+
+const PRIORITY_STYLES = {
+  P1: { color: "#1d4ed8" },
+  P2: { color: "#0891b2" },
+  P3: { color: "#64748b" },
+};
+const priColor = (p) => PRIORITY_STYLES[p]?.color || "#64748b";
+
+function firstOfMonth(d) { const x = new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
+function daysInMonth(d) { return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate(); }
+function monthName(d) { return d.toLocaleString(undefined, { month: "long", year: "numeric" }); }
+function addMonths(d, delta) { const x = new Date(d); x.setMonth(x.getMonth()+delta); return x; }
+function localIso(d) { const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const day=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; }
+function daysBetween(a,b){const A=new Date(a+"T00:00:00");const B=new Date(b+"T00:00:00");return Math.round((B-A)/86400000);}
+
+const defaultWellbeingGoals = [
+  { id: "exercise", name: "Exercise", monthlyTarget: 12, color: "#0ea5e9" },
+  { id: "mindfulness", name: "Mindfulness", monthlyTarget: 16, color: "#22c55e" },
+  { id: "sleep", name: "Sleep Early", monthlyTarget: 20, color: "#a78bfa" },
+];
 
 const MonthlyPlanner = () => {
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [monthlyGoals, setMonthlyGoals] = useState([
-    "Complete major project milestone",
-    "Launch new product feature",
-    "Improve team productivity by 20%",
-    "Achieve work-life balance goals"
-  ]);
-  const [newGoal, setNewGoal] = useState("");
-  const [milestones, setMilestones] = useState([
-    { id: 1, title: "Project Phase 1 Complete", date: "2024-01-15", status: "completed" },
-    { id: 2, title: "Team Training Session", date: "2024-01-22", status: "in-progress" },
-    { id: 3, title: "Quarterly Review", date: "2024-01-31", status: "pending" }
-  ]);
-  const [newMilestone, setNewMilestone] = useState({ title: "", date: "" });
-  const [strategicObjectives, setStrategicObjectives] = useState({
-    professional: { target: 5, current: 2 },
-    personal: { target: 3, current: 1 },
-    health: { target: 4, current: 3 },
-    learning: { target: 2, current: 1 }
+  const [viewDate, setViewDate] = useState(() => firstOfMonth(new Date()));
+  const [deadlines, setDeadlines] = useState([]);
+
+  // Filters
+  const [q, setQ] = useState("");
+  const [fCategory, setFCategory] = useState("all");
+  const [fPriority, setFPriority] = useState("all");
+  const [fStatus, setFStatus] = useState("all");
+
+  // Form state
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState(() => localIso(new Date()));
+  const [category, setCategory] = useState("project");
+  const [priority, setPriority] = useState("P2");
+  const [status, setStatus] = useState("Planned");
+  const [owner, setOwner] = useState("");
+  const [link, setLink] = useState("");
+
+  // Wellbeing goals
+  const [wellbeingGoals, setWellbeingGoals] = useState(defaultWellbeingGoals);
+  const [wellbeingProgress, setWellbeingProgress] = useState(() => {
+    const seed = {};
+    for (const g of defaultWellbeingGoals) seed[g.id] = 0;
+    return seed;
   });
-  const [generatedPlanner, setGeneratedPlanner] = useState(null);
-  const plannerRef = useRef(null);
 
-  const getMonthName = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  };
+  const todayISO = localIso(new Date());
 
-  const getDaysInMonth = (date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  const navigateMonth = (direction) => {
-    const newDate = new Date(currentMonth);
-    newDate.setMonth(currentMonth.getMonth() + direction);
-    setCurrentMonth(newDate);
-  };
-
-  const addGoal = () => {
-    if (newGoal.trim()) {
-      setMonthlyGoals([...monthlyGoals, newGoal.trim()]);
-      setNewGoal("");
+  const grid = useMemo(() => {
+    const first = firstOfMonth(viewDate);
+    const startDay = first.getDay();
+    const dim = daysInMonth(viewDate);
+    const cells = [];
+    for (let i=0;i<startDay;i++) cells.push({ day:null });
+    for (let d=1; d<=dim; d++) {
+      const iso = localIso(new Date(viewDate.getFullYear(), viewDate.getMonth(), d));
+      cells.push({ day:d, iso });
     }
-  };
+    while (cells.length < 42) cells.push({ day:null });
+    return cells;
+  }, [viewDate]);
 
-  const removeGoal = (index) => {
-    setMonthlyGoals(monthlyGoals.filter((_, i) => i !== index));
-  };
-
-  const addMilestone = () => {
-    if (newMilestone.title.trim() && newMilestone.date) {
-      const milestone = {
-        id: Date.now(),
-        title: newMilestone.title.trim(),
-        date: newMilestone.date,
-        status: "pending"
-      };
-      setMilestones([...milestones, milestone]);
-      setNewMilestone({ title: "", date: "" });
+  const deadlinesByISO = useMemo(() => {
+    const map = new Map();
+    for (const dl of deadlines) {
+      const arr = map.get(dl.date) || [];
+      arr.push(dl);
+      map.set(dl.date, arr);
     }
-  };
+    return map;
+  }, [deadlines]);
 
-  const removeMilestone = (id) => {
-    setMilestones(milestones.filter(m => m.id !== id));
-  };
+  function addDeadline(){ if(!title.trim()||!date) return; setDeadlines(ds=>[...ds,{ id:Math.random().toString(36).slice(2), title:title.trim(), date, category, priority, status, owner: owner.trim()||undefined, link: link.trim()||undefined, starred:false }]); setTitle(""); setOwner(""); setLink(""); setPriority("P2"); setStatus("Planned"); setCategory("project"); }
+  function toggleStar(id){ setDeadlines(ds=>ds.map(d=>d.id===id?{...d, starred:!d.starred}:d)); }
+  function updateStatus(id,s){ setDeadlines(ds=>ds.map(d=>d.id===id?{...d,status:s}:d)); }
+  function snooze(id,days){ setDeadlines(ds=>ds.map(d=>d.id===id?{...d,date:localIso(new Date(new Date(d.date+"T00:00:00").getTime()+days*86400000))}:d)); }
+  function removeDeadline(id){ setDeadlines(ds=>ds.filter(d=>d.id!==id)); }
 
-  const updateMilestoneStatus = (id, status) => {
-    setMilestones(milestones.map(m => 
-      m.id === id ? { ...m, status } : m
-    ));
-  };
+  const filtered = useMemo(()=>{
+    return deadlines
+      .filter(d=>{
+        const byQ = q.trim() ? (d.title.toLowerCase().includes(q.toLowerCase()) || d.owner?.toLowerCase().includes(q.toLowerCase())) : true;
+        const byC = fCategory === "all" ? true : d.category === fCategory;
+        const byP = fPriority === "all" ? true : d.priority === fPriority;
+        const byS = fStatus === "all" ? true : d.status === fStatus;
+        return byQ && byC && byP && byS;
+      })
+      .sort((a,b)=>a.date.localeCompare(b.date));
+  }, [deadlines,q,fCategory,fPriority,fStatus]);
 
-  const updateStrategicObjective = (category, value) => {
-    setStrategicObjectives({
-      ...strategicObjectives,
-      [category]: { ...strategicObjectives[category], current: Math.max(0, value) }
-    });
-  };
+  const groups = useMemo(()=>{
+    const today = todayISO;
+    const s = { overdue:[], week:[], later:[] };
+    for(const d of filtered){
+      if(d.date < today && d.status !== "Done") s.overdue.push(d);
+      else if(daysBetween(today,d.date) <= 7) s.week.push(d);
+      else s.later.push(d);
+    }
+    return s;
+  }, [filtered, todayISO]);
 
-  const generatePlanner = () => {
-    const monthName = getMonthName(currentMonth);
-    const daysInMonth = getDaysInMonth(currentMonth);
-    
-    const completedMilestones = milestones.filter(m => m.status === 'completed').length;
-    const totalMilestones = milestones.length;
-    
-    const planner = {
-      month: monthName,
-      daysInMonth: daysInMonth,
-      monthlyGoals: monthlyGoals,
-      milestones: milestones,
-      strategicObjectives: strategicObjectives,
-      analytics: {
-        goalCompletion: Math.floor((completedMilestones / totalMilestones) * 100),
-        strategicProgress: Object.entries(strategicObjectives).map(([key, obj]) => ({
-          category: key,
-          progress: Math.round((obj.current / obj.target) * 100)
-        })),
-        monthlyScore: Math.floor(
-          (completedMilestones / totalMilestones) * 50 + 
-          (Object.values(strategicObjectives).reduce((sum, obj) => sum + (obj.current / obj.target), 0) / Object.keys(strategicObjectives).length) * 50
-        )
-      }
-    };
+  function handleDownload(){ window.print(); }
+  function catColor(key){ return CATEGORIES.find(c=>c.key===key)?.color || "#6b7280"; }
 
-    setGeneratedPlanner(planner);
-  };
+  function incWellbeing(id, delta){
+    setWellbeingProgress(p=>({ ...p, [id]: Math.max(0, (p[id]||0) + delta) }));
+  }
 
-  const downloadPDF = () => {
-    if (!generatedPlanner) return;
-    
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Monthly Planner - ${generatedPlanner.month}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .section { margin-bottom: 25px; }
-          .section h3 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-          .milestone-item { border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 5px; }
-          .milestone-completed { background-color: #d4edda; border-color: #c3e6cb; }
-          .milestone-in-progress { background-color: #fff3cd; border-color: #ffeaa7; }
-          .milestone-pending { background-color: #f8f9fa; border-color: #dee2e6; }
-          .progress-bar { background: #f0f0f0; border-radius: 10px; height: 20px; margin: 5px 0; }
-          .progress-fill { background: #6f42c1; height: 100%; border-radius: 10px; text-align: center; color: white; font-size: 12px; line-height: 20px; }
-          .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-          .analytics-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>📅 Monthly Planner</h1>
-          <h2>${generatedPlanner.month}</h2>
-          <p>${generatedPlanner.daysInMonth} days to achieve your goals</p>
-        </div>
-        
-        <div class="section">
-          <h3>🎯 Monthly Goals</h3>
-          <ul>
-            ${generatedPlanner.monthlyGoals.map(goal => `<li>• ${goal}</li>`).join('')}
-          </ul>
-        </div>
-        
-        <div class="section">
-          <h3>🏆 Milestones</h3>
-          ${generatedPlanner.milestones.map(milestone => `
-            <div class="milestone-item milestone-${milestone.status}">
-              <strong>${milestone.title}</strong> - ${milestone.date}
-              <span style="float: right; text-transform: capitalize;">${milestone.status}</span>
-            </div>
-          `).join('')}
-        </div>
-        
-        <div class="section">
-          <h3>📊 Strategic Objectives Progress</h3>
-          ${generatedPlanner.analytics.strategicProgress.map(item => `
-            <div>
-              <strong>${item.category.charAt(0).toUpperCase() + item.category.slice(1)}</strong>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: ${item.progress}%">${item.progress}%</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-        
-        <div class="section">
-          <h3>📈 Monthly Analytics</h3>
-          <div class="analytics-grid">
-            <div class="analytics-card">
-              <h4>Goal Completion</h4>
-              <div style="font-size: 24px; font-weight: bold; color: #6f42c1;">${generatedPlanner.analytics.goalCompletion}%</div>
-            </div>
-            <div class="analytics-card">
-              <h4>Monthly Score</h4>
-              <div style="font-size: 24px; font-weight: bold; color: #6f42c1;">${generatedPlanner.analytics.monthlyScore}/100</div>
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `monthly-planner-${new Date().toISOString().split('T')[0]}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  useEffect(()=>{
+    if(typeof document === "undefined") return;
+    const containsText = (t)=>Array.from(document.querySelectorAll("*")).some(el=>el.textContent?.includes(t));
+    console.assert(containsText("Monthly Planner"), "[MonthlyPlanner] Missing title");
+    console.assert(containsText("Month"), "[MonthlyPlanner] Missing calendar heading");
+    console.assert(containsText("Overdue"), "[MonthlyPlanner] Missing Overdue list");
+    console.assert(containsText("Due in 7 days"), "[MonthlyPlanner] Missing Due in 7 days list");
+    console.assert(containsText("Wellbeing Goals"), "[MonthlyPlanner] Missing Wellbeing section");
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-sky-50 py-6 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background blobs */}
       <div className="pointer-events-none absolute inset-0 opacity-20">
         <div className="absolute top-0 right-1/3 h-80 w-80 rounded-full bg-gradient-to-br from-orange-200/40 to-pink-200/40 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-gradient-to-br from-sky-200/40 to-pink-200/40 blur-3xl" />
       </div>
       
-      <div className="relative z-10 mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-4 inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/20 px-4 py-2 font-medium text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/30 hover:shadow-md"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </button>
-          
-          <div className="text-center">
-            <div className="mb-4 flex items-center justify-center gap-3">
-              <div className="rounded-2xl bg-gradient-to-r from-purple-500 to-violet-500 p-4">
-                <CalendarRange className="text-white" size={32} />
-              </div>
-              <h1 className="text-3xl font-bold text-slate-800 sm:text-4xl">
-                Monthly Planner Generator
-              </h1>
-            </div>
-            <p className="mx-auto max-w-2xl text-lg text-slate-600">
-              Strategic planning with long-term goals and milestone tracking
-            </p>
+      <div className="relative z-10 mx-auto max-w-7xl print-mono">
+        <div className="mb-6 text-center no-print">
+          <div className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-violet-600 p-3 text-white">
+            <CalendarDays size={20} />
+            <span className="font-semibold">Monthly Planner</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Configuration Panel */}
-          <div className="space-y-6">
-            {/* Month Navigation */}
-            <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md">
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  onClick={() => navigateMonth(-1)}
-                  className="p-2 rounded-lg bg-white/50 hover:bg-white/70 transition-colors"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <h3 className="text-xl font-semibold text-slate-800">
-                  {getMonthName(currentMonth)}
-                </h3>
-                <button
-                  onClick={() => navigateMonth(1)}
-                  className="p-2 rounded-lg bg-white/50 hover:bg-white/70 transition-colors"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-              <div className="text-center text-slate-600">
-                {getDaysInMonth(currentMonth)} days in this month
-              </div>
-            </div>
-
-            {/* Monthly Goals */}
-            <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md">
-              <h3 className="mb-4 flex items-center gap-2 text-xl font-semibold text-slate-800">
-                <Target size={20} />
-                Monthly Goals
-              </h3>
-              <div className="space-y-3">
-                {monthlyGoals.map((goal, index) => (
-                  <div key={index} className="flex items-center gap-2 p-3 bg-white rounded-lg">
-                    <CheckCircle size={16} className="text-green-500" />
-                    <span className="flex-1 text-slate-700">{goal}</span>
-                    <button
-                      onClick={() => removeGoal(index)}
-                      className="p-1 text-red-500 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newGoal}
-                    onChange={(e) => setNewGoal(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addGoal()}
-                    placeholder="Add a monthly goal..."
-                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none"
-                  />
-                  <button
-                    onClick={addGoal}
-                    className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Milestones */}
-            <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md">
-              <h3 className="mb-4 flex items-center gap-2 text-xl font-semibold text-slate-800">
-                <Award size={20} />
-                Milestones
-              </h3>
-              <div className="space-y-3">
-                {milestones.map((milestone) => (
-                  <div key={milestone.id} className="bg-white rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-slate-800">{milestone.title}</h4>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        milestone.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        milestone.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {milestone.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600">{milestone.date}</span>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => updateMilestoneStatus(milestone.id, 'completed')}
-                          className="p-1 text-green-600 hover:bg-green-50 rounded"
-                        >
-                          <CheckCircle size={14} />
-                        </button>
-                        <button
-                          onClick={() => removeMilestone(milestone.id)}
-                          className="p-1 text-red-500 hover:bg-red-50 rounded"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={newMilestone.title}
-                    onChange={(e) => setNewMilestone({...newMilestone, title: e.target.value})}
-                    placeholder="Milestone title..."
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none"
-                  />
-                  <div className="flex gap-2">
-                    <input
-                      type="date"
-                      value={newMilestone.date}
-                      onChange={(e) => setNewMilestone({...newMilestone, date: e.target.value})}
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none"
-                    />
-                    <button
-                      onClick={addMilestone}
-                      className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Strategic Objectives */}
-            <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md">
-              <h3 className="mb-4 flex items-center gap-2 text-xl font-semibold text-slate-800">
-                <BarChart3 size={20} />
-                Strategic Objectives
-              </h3>
-              <div className="space-y-4">
-                {Object.entries(strategicObjectives).map(([key, objective]) => (
-                  <div key={key} className="bg-white rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-slate-800 capitalize">{key}</h4>
-                      <span className="text-sm text-slate-600">
-                        {objective.current}/{objective.target}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateStrategicObjective(key, objective.current - 1)}
-                        className="w-8 h-8 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
-                      >
-                        -
-                      </button>
-                      <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-purple-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${Math.min((objective.current / objective.target) * 100, 100)}%` }}
-                        />
-                      </div>
-                      <button
-                        onClick={() => updateStrategicObjective(key, objective.current + 1)}
-                        className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Generate Button */}
+        {/* Header controls */}
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3 no-print">
+          <div className="flex items-center gap-2">
             <button
-              onClick={generatePlanner}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:brightness-105 hover:shadow-xl"
+              onClick={() => navigate('/planner')}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/20 px-4 py-2 font-medium text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/30 hover:shadow-md"
             >
-              <RefreshCw size={18} />
-              Generate Monthly Planner
+              <ArrowLeft size={16} /> Back
+            </button>
+            <button
+              className="rounded-lg bg-white/80 text-sky-700 border border-white/40 hover:bg-white px-3 py-2"
+              onClick={()=>setViewDate(d=>addMonths(d,-1))}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div className="px-3 py-2 text-slate-800 font-medium rounded-lg bg-white/80 border border-white/40">
+              {monthName(viewDate)}
+            </div>
+          <button
+              className="rounded-lg bg-white/80 text-sky-700 border border-white/40 hover:bg-white px-3 py-2"
+              onClick={()=>setViewDate(d=>addMonths(d,1))}
+            >
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
+          <button onClick={handleDownload} className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 shadow">
+            <Download className="inline-block mr-2 h-4 w-4" /> Download / Print
+          </button>
+        </div>
 
-          {/* Preview Panel */}
-          <div className="space-y-6">
-            {generatedPlanner ? (
-              <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-slate-800">Monthly Planner Preview</h3>
-                  <button
-                    onClick={downloadPDF}
-                    className="flex items-center gap-2 rounded-lg bg-purple-500 px-4 py-2 text-white hover:bg-purple-600 transition-colors"
-                  >
-                    <Download size={16} />
-                    Download
-                  </button>
-                </div>
-                
-                <div 
-                  ref={plannerRef}
-                  className="rounded-xl p-6 bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg"
-                >
-                  <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold mb-2">📅 Monthly Planner</h2>
-                    <p className="text-lg opacity-90">{generatedPlanner.month}</p>
-                    <p className="text-sm opacity-75">{generatedPlanner.daysInMonth} days to achieve your goals</p>
+        {/* Calendar */}
+        <div className="rounded-2xl border border-white/30 bg-white/20 shadow-xl backdrop-blur-md mb-4">
+          <div className="p-4">
+            <div className="flex items-center gap-2 text-slate-700 mb-2">
+              <CalendarDays className="h-5 w-5" /> Month
+            </div>
+            <div className="grid grid-cols-7 text-center text-xs font-medium text-slate-600 mb-2">
+              {WEEKDAYS.map((w)=> (<div key={w} className="py-1">{w}</div>))}
+            </div>
+            <div className="grid grid-cols-7 gap-2">
+              {grid.map((cell, idx)=> (
+                <div key={idx} className={`min-h-[92px] rounded-xl border ${cell.day? "bg-white border-slate-200" : "bg-slate-100/40 border-transparent"} p-2 flex flex-col`}>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-800">{cell.day || ""}</span>
+                    {cell.iso && deadlinesByISO.get(cell.iso)?.length ? (
+                      <span className="text-[10px] text-slate-700">{deadlinesByISO.get(cell.iso).length} due</span>
+                    ) : null}
                   </div>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                        🎯 Monthly Goals
-                      </h3>
-                      <ul className="space-y-1">
-                        {generatedPlanner.monthlyGoals.map((goal, index) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <span className="w-2 h-2 bg-white rounded-full"></span>
-                            {goal}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                        🏆 Milestones Progress
-                      </h3>
-                      <div className="bg-white/20 rounded-lg p-4">
-                        <div className="text-center">
-                          <div className="text-3xl font-bold">{generatedPlanner.analytics.goalCompletion}%</div>
-                          <div className="text-sm opacity-90">Goal Completion Rate</div>
-                        </div>
+                  <div className="mt-1 space-y-1">
+                    {cell.iso && (deadlinesByISO.get(cell.iso) || []).slice(0,3).map((d)=> (
+                      <div key={d.id} className="truncate rounded-md px-2 py-1 flex items-center gap-1 text-[11px]"
+                        style={{ backgroundColor: `${priColor(d.priority)}15`, border: `1px solid ${priColor(d.priority)}30`, color: priColor(d.priority), boxShadow: `inset 3px 0 0 ${catColor(d.category)}` }}>
+                        <Flag className="h-3 w-3" /> {d.title}
+                        <span className="ml-auto text-[10px] font-semibold rounded-full px-1.5 py-0.5" style={{ backgroundColor: `${priColor(d.priority)}15`, border: `1px solid ${priColor(d.priority)}30`, color: priColor(d.priority) }}>{d.priority}</span>
+                        {d.status === "Done" && <Check className="ml-auto h-3 w-3" />}
                       </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                        📊 Strategic Progress
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {generatedPlanner.analytics.strategicProgress.map((item, index) => (
-                          <div key={index} className="bg-white/20 rounded-lg p-3">
-                            <div className="text-sm font-medium capitalize">{item.category}</div>
-                            <div className="mt-1 bg-white/30 rounded-full h-2">
-                              <div 
-                                className="bg-white h-2 rounded-full transition-all duration-300"
-                                style={{ width: `${item.progress}%` }}
-                              />
-                            </div>
-                            <div className="text-xs mt-1">{item.progress}%</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white/20 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold">Monthly Score</div>
-                      <div className="text-4xl font-bold">{generatedPlanner.analytics.monthlyScore}/100</div>
-                    </div>
+                    ))}
+                    {cell.iso && (deadlinesByISO.get(cell.iso)?.length || 0) > 3 && (
+                      <div className="text-[10px] text-slate-700">+ more…</div>
+                    )}
                   </div>
-                </div>
               </div>
-            ) : (
-              <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md">
-                <div className="text-center py-12">
-                  <CalendarRange size={48} className="mx-auto text-slate-400 mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-600 mb-2">No Monthly Planner Generated</h3>
-                  <p className="text-slate-500">Configure your settings and click "Generate Monthly Planner" to see a preview</p>
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* Controls + Add form */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {/* Filters */}
+          <div className="rounded-2xl border border-white/30 bg-white/20 shadow-xl backdrop-blur-md lg:col-span-2">
+            <div className="p-4">
+              <div className="flex items-center gap-2 text-slate-700 mb-3"><Filter className="h-5 w-5" /> Filters</div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <input placeholder="Search title or owner…" value={q} onChange={(e)=>setQ(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2" />
+                <select value={fCategory} onChange={(e)=>setFCategory(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2">
+                  <option value="all">All categories</option>
+                  {CATEGORIES.map(c=> (<option key={c.key} value={c.key}>{c.label}</option>))}
+                </select>
+                <select value={fPriority} onChange={(e)=>setFPriority(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2">
+                  <option value="all">All priorities</option>
+                  {PRIORITIES.map(p=> (<option key={p} value={p}>{p}</option>))}
+                </select>
+                <select value={fStatus} onChange={(e)=>setFStatus(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2">
+                  <option value="all">All status</option>
+                  {STATUSES.map(s=> (<option key={s} value={s}>{s}</option>))}
+                </select>
+              </div>
+              </div>
+            </div>
+
+          {/* Add deadline */}
+          <div className="rounded-2xl border border-white/30 bg-white/20 shadow-xl backdrop-blur-md">
+            <div className="p-4">
+              <div className="flex items-center gap-2 text-slate-700 mb-3"><Flag className="h-5 w-5" /> Add deadline</div>
+              <div className="grid grid-cols-2 gap-2">
+                <input placeholder="Title" value={title} onChange={(e)=>setTitle(e.target.value)} className="col-span-2 rounded-lg border-slate-300 px-3 py-2" />
+                <input type="date" value={date} onChange={(e)=>setDate(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2" />
+                <select value={category} onChange={(e)=>setCategory(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2">
+                  {CATEGORIES.map(c=> (<option key={c.key} value={c.key}>{c.label}</option>))}
+                </select>
+                <select value={priority} onChange={(e)=>setPriority(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2">
+                  {PRIORITIES.map(p=> (<option key={p} value={p}>{p}</option>))}
+                </select>
+                <select value={status} onChange={(e)=>setStatus(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2">
+                  {STATUSES.map(s=> (<option key={s} value={s}>{s}</option>))}
+                </select>
+                <input placeholder="Owner (optional)" value={owner} onChange={(e)=>setOwner(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2" />
+                <div className="flex items-center gap-2">
+                  <LinkIcon className="h-4 w-4 text-slate-700" />
+                  <input placeholder="Link (optional)" value={link} onChange={(e)=>setLink(e.target.value)} className="rounded-lg border-slate-300 px-3 py-2 w-full" />
+                  </div>
+                <div className="col-span-2 flex justify-end mt-1">
+                  <button onClick={addDeadline} className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white px-4 py-2">Add</button>
+                </div>
+              </div>
+                </div>
+              </div>
+            </div>
+
+        {/* Lists + Wellbeing */}
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {/* Overdue */}
+          <div className="rounded-2xl border border-white/30 bg-white/20 shadow-xl backdrop-blur-md">
+            <div className="p-4">
+              <div className="text-slate-700 font-semibold mb-2">Overdue</div>
+              {groups.overdue.length === 0 && (<p className="text-sm text-slate-600">None — great job 👏</p>)}
+              <ul className="space-y-2">
+                {groups.overdue.map(d=> (
+                  <li key={d.id} className="rounded-xl border border-slate-200 p-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <button onClick={()=>toggleStar(d.id)} title="Star" className={`h-6 w-6 rounded-full border ${d.starred? "bg-yellow-400/90 text-white border-yellow-400":"bg-white text-slate-700 border-slate-200 hover:bg-slate-50"}`}>
+                        <Star className="h-3 w-3" />
+                      </button>
+                      <span className="font-medium text-slate-800">{d.title}</span>
+                      <span className="ml-auto text-slate-600">D+{Math.abs(daysBetween(d.date, todayISO))}</span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
+                      <span className="rounded-full px-2 py-0.5" style={{ backgroundColor:`${priColor(d.priority)}15`, border:`1px solid ${priColor(d.priority)}30`, color:priColor(d.priority), boxShadow:`inset 3px 0 0 ${catColor(d.category)}` }}>{CATEGORIES.find(c=>c.key===d.category)?.label}</span>
+                      <span className="rounded-full px-2 py-0.5" style={{ backgroundColor:`${priColor(d.priority)}15`, border:`1px solid ${priColor(d.priority)}30`, color:priColor(d.priority) }}>{d.priority}</span>
+                      <span className="rounded-full border border-slate-200 px-2 py-0.5">{d.status}</span>
+                      {d.owner && <span className="rounded-full border border-slate-200 px-2 py-0.5">@{d.owner}</span>}
+                      {d.link && (<a className="rounded-full border border-slate-200 px-2 py-0.5" href={d.link} target="_blank" rel="noreferrer">Link</a>)}
+                      <div className="ml-auto flex gap-1">
+                        <button className="h-7 rounded-lg bg-white text-slate-700 border border-slate-200 px-2 hover:bg-slate-50" onClick={()=>updateStatus(d.id, "Done")}><Check className="h-3 w-3 mr-1 inline"/>Done</button>
+                        <button className="h-7 rounded-lg bg-white text-slate-700 border border-slate-200 px-2 hover:bg-slate-50" onClick={()=>snooze(d.id,1)}><Clock3 className="h-3 w-3 mr-1 inline"/>+1d</button>
+                        <button className="h-7 rounded-lg bg-white text-slate-700 border border-slate-200 px-2 hover:bg-slate-50" onClick={()=>snooze(d.id,7)}><Clock3 className="h-3 w-3 mr-1 inline"/>+1w</button>
+                        <button className="h-7 rounded-lg text-slate-700 px-2 hover:bg-slate-50" onClick={()=>removeDeadline(d.id)}>Remove</button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              </div>
+            </div>
+
+          {/* Week */}
+          <div className="rounded-2xl border border-white/30 bg-white/20 shadow-xl backdrop-blur-md">
+            <div className="p-4">
+              <div className="text-slate-700 font-semibold mb-2">Due in 7 days</div>
+              {groups.week.length === 0 && (<p className="text-sm text-slate-600">Nothing due in the next week.</p>)}
+              <ul className="space-y-2">
+                {groups.week.map(d=> (
+                  <li key={d.id} className="rounded-xl border border-slate-200 p-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <button onClick={()=>toggleStar(d.id)} title="Star" className={`h-6 w-6 rounded-full border ${d.starred? "bg-yellow-400/90 text-white border-yellow-400":"bg-white text-slate-700 border-slate-200 hover:bg-slate-50"}`}>
+                        <Star className="h-3 w-3" />
+                      </button>
+                      <span className="font-medium text-slate-800">{d.title}</span>
+                      <span className="ml-auto text-slate-600">D‑{daysBetween(todayISO, d.date)}</span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
+                      <span className="rounded-full px-2 py-0.5" style={{ backgroundColor:`${priColor(d.priority)}15`, border:`1px solid ${priColor(d.priority)}30`, color:priColor(d.priority), boxShadow:`inset 3px 0 0 ${catColor(d.category)}` }}>{CATEGORIES.find(c=>c.key===d.category)?.label}</span>
+                      <span className="rounded-full px-2 py-0.5" style={{ backgroundColor:`${priColor(d.priority)}15`, border:`1px solid ${priColor(d.priority)}30`, color:priColor(d.priority) }}>{d.priority}</span>
+                      <span className="rounded-full border border-slate-200 px-2 py-0.5">{d.status}</span>
+                      {d.owner && <span className="rounded-full border border-slate-200 px-2 py-0.5">@{d.owner}</span>}
+                      {d.link && (<a className="rounded-full border border-slate-200 px-2 py-0.5" href={d.link} target="_blank" rel="noreferrer">Link</a>)}
+                      <div className="ml-auto flex gap-1">
+                        <button className="h-7 rounded-lg bg-white text-slate-700 border border-slate-200 px-2 hover:bg-slate-50" onClick={()=>updateStatus(d.id, "In Progress")}>In Progress</button>
+                        <button className="h-7 rounded-lg bg-white text-slate-700 border border-slate-200 px-2 hover:bg-slate-50" onClick={()=>updateStatus(d.id, "Blocked")}>Blocked</button>
+                        <button className="h-7 rounded-lg bg-white text-slate-700 border border-slate-200 px-2 hover:bg-slate-50" onClick={()=>updateStatus(d.id, "Done")}><Check className="h-3 w-3 mr-1 inline"/>Done</button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Wellbeing Goals */}
+          <div className="rounded-2xl border border-white/30 bg-white/20 shadow-xl backdrop-blur-md">
+            <div className="p-4">
+              <div className="flex items-center gap-2 text-slate-700 font-semibold mb-2"><HeartPulse className="h-5 w-5"/> Wellbeing Goals</div>
+              <div className="space-y-3">
+                {wellbeingGoals.map(g=>{
+                  const val = wellbeingProgress[g.id]||0;
+                  const pct = Math.min(100, Math.round((val / g.monthlyTarget) * 100));
+                  return (
+                    <div key={g.id} className="bg-white rounded-lg p-3 border border-slate-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-medium text-slate-800">{g.name}</div>
+                        <div className="text-xs text-slate-600">{val}/{g.monthlyTarget}</div>
+                </div>
+                      <div className="h-2 rounded-full bg-slate-200">
+                        <div className="h-2 rounded-full" style={{ width: `${pct}%`, backgroundColor: g.color }} />
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <button className="px-2 py-1 rounded-md bg-white border border-slate-200 text-slate-700 hover:bg-slate-50" onClick={()=>incWellbeing(g.id, -1)}>-1</button>
+                        <button className="px-2 py-1 rounded-md bg-purple-600 text-white hover:bg-purple-700" onClick={()=>incWellbeing(g.id, 1)}>Log today +1</button>
+                      </div>
+                    </div>
+                  );
+                })}
+                </div>
+              </div>
+          </div>
+        </div>
+
+        {/* Print styles - minimal (no color blocks, hide header/buttons/footer) */}
+        <style>{`
+          @page { size: A4; margin: 12mm; }
+          @media print {
+            /* Hide gradients/header/controls/footer */
+            .no-print, footer, .site-footer, .app-footer { display: none !important; }
+            body { background: white; }
+            /* Remove shadows and blur backgrounds */
+            .shadow, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
+            .backdrop-blur-md { backdrop-filter: none !important; }
+            /* Flatten card backgrounds to white */
+            .print-mono * { background: white !important; }
+            /* Borders remain淡灰，文本黑白 */
+            * { color: #111 !important; -webkit-print-color-adjust: economy; print-color-adjust: economy; }
+          }
+        `}</style>
       </div>
     </div>
   );
 };
 
 export default MonthlyPlanner;
+
+
 
