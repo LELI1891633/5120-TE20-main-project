@@ -76,26 +76,9 @@ class ConnectionScore(Base):
     __tablename__ = "it3_connection_score_table"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    question: Mapped[str] = mapped_column(Text)
-    Daily: Mapped[int] = mapped_column(Integer)
-    Weekly: Mapped[int] = mapped_column(Integer)
-    Monthly: Mapped[int] = mapped_column(Integer)
-    Rarely: Mapped[int] = mapped_column(Integer)
-    Never: Mapped[int] = mapped_column(Integer)
-    Strongly_agree: Mapped[int] = mapped_column(Integer)
-    Agree: Mapped[int] = mapped_column(Integer)
-    Neutral: Mapped[int] = mapped_column(Integer)
-    Disagree: Mapped[int] = mapped_column(Integer)
-    Yes: Mapped[int] = mapped_column(Integer)
-    No: Mapped[int] = mapped_column(Integer)
-    Unsure: Mapped[int] = mapped_column(Integer)
-    Sometimes: Mapped[int] = mapped_column(Integer)
-    Often: Mapped[int] = mapped_column(Integer)
-    Always: Mapped[int] = mapped_column(Integer)
-    official_benchmark: Mapped[str] = mapped_column(String(255))
-    mapping_logic: Mapped[str] = mapped_column(String(255))
-    source: Mapped[str] = mapped_column(String(255))
-    source_link: Mapped[str] = mapped_column(String(700))
+    question: Mapped[str] = mapped_column(Text, nullable=False)
+    answer_options: Mapped[str] = mapped_column(String(255), nullable=False)
+    reference_link: Mapped[str] = mapped_column(String(700))
 
 
 
