@@ -73,6 +73,12 @@ a {
   box-shadow: 0 0 0 2px rgb(14 165 233 / 0.5);
 }
 
+
+.swing {
+  animation: hammerSwing 0.3s ease-in-out;
+}
+
+
 /* Mobile touch optimizations */
 @media (max-width: 768px) {
   /* Ensure touch targets are at least 44px */
