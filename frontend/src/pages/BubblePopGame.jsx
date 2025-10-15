@@ -1,23 +1,44 @@
-// src/pages/BubblePopGame.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Info, Gamepad2 } from "lucide-react";
 
 export default function BubblePopGame() {
   const navigate = useNavigate();
   const COLS = 7;
-  const size = COLS * COLS; 
-  const BUBBLE = 56;  
+  const size = COLS * COLS;
+  const BUBBLE = 56;
 
   const [popped, setPopped] = useState(() => Array(size).fill(false));
+
+  const popSound = useRef(new Audio("/sounds/pop1.mp3"));
+
+  useEffect(() => {
+    popSound.current.volume = 0.6;
+    popSound.current.load();
+  }, []);
+
+  const playPopSound = () => {
+    const sound = popSound.current.cloneNode(); 
+    sound.volume = 0.6;
+    sound.play().catch(() => {});
+  };
+
   const reset = () => setPopped(Array(size).fill(false));
+
   const pop = (i) =>
-    setPopped((arr) => (arr[i] ? arr : ((arr = arr.slice()), (arr[i] = true), arr)));
+    setPopped((arr) => {
+      if (arr[i]) return arr;
+      const newArr = arr.slice();
+      newArr[i] = true;
+      playPopSound();
+      return newArr;
+    });
 
   const poppedCount = popped.filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-sky-50">
+      {/* Header */}
       <header className="mx-auto max-w-5xl px-4 pt-4 pb-3 flex items-center justify-between">
         <button
           onClick={() => navigate("/stress-buster")}
@@ -33,25 +54,29 @@ export default function BubblePopGame() {
         </button>
       </header>
 
+      {/* Main */}
       <main className="mx-auto max-w-5xl px-4 pb-8">
         <div className="mb-6 flex items-center gap-3">
-          <div className="rounded-2xl bg-cyan-100 p-2"><Gamepad2 className="text-cyan-600" size={20} /></div>
+          <div className="rounded-2xl bg-cyan-100 p-2">
+            <Gamepad2 className="text-cyan-600" size={20} />
+          </div>
           <h1 className="text-2xl font-semibold">Bubble Pop</h1>
         </div>
 
         <div className="rounded-3xl border border-white/40 bg-white/70 p-6 shadow-xl backdrop-blur-md overflow-x-auto">
-+          <div
-            className="grid gap-3 w-fit mx-auto"             
-            style={{ gridTemplateColumns: `repeat(${COLS}, ${BUBBLE}px)` }}          >
+          <div
+            className="grid gap-3 w-fit mx-auto"
+            style={{ gridTemplateColumns: `repeat(${COLS}, ${BUBBLE}px)` }}
+          >
             {popped.map((isPopped, i) => (
               <button
                 key={i}
                 onClick={() => pop(i)}
-                style={{ width: BUBBLE, height: BUBBLE }} 
-                className={`rounded-full transition-all ${
+                style={{ width: BUBBLE, height: BUBBLE }}
+                className={`rounded-full transition-all duration-150 ${
                   isPopped
-                    ? "scale-95 bg-slate-200"
-                    : "bg-gradient-to-br from-cyan-200 to-sky-200 hover:from-cyan-300 hover:to-sky-300"
+                    ? "scale-90 bg-slate-200 cursor-default"
+                    : "bg-gradient-to-br from-cyan-200 to-sky-200 hover:from-cyan-300 hover:to-sky-300 active:scale-95"
                 }`}
                 aria-label={isPopped ? "Popped" : "Pop bubble"}
               />
@@ -59,8 +84,13 @@ export default function BubblePopGame() {
           </div>
 
           <div className="mt-4 flex items-center justify-between text-sm text-slate-600">
-            <span>Popped: {poppedCount} / {size}</span>
-            <button onClick={reset} className="rounded-lg bg-slate-100 px-3 py-1 ring-1 ring-slate-200 hover:bg-slate-200">
+            <span>
+              Popped: {poppedCount} / {size}
+            </span>
+            <button
+              onClick={reset}
+              className="rounded-lg bg-slate-100 px-3 py-1 ring-1 ring-slate-200 hover:bg-slate-200 transition"
+            >
               Reset
             </button>
           </div>

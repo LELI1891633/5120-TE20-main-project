@@ -140,13 +140,6 @@ const HealthyDesk = () => {
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold text-slate-800">Healthy Desk</h1>
             </div>
-            <button
-              onClick={() => setAssistantOpen(true)}
-              className="flex items-center gap-2 bg-sky-100 hover:bg-sky-200 text-sky-700 px-4 py-2 rounded-lg transition-colors duration-200"
-            >
-              <Info size={18} />
-              <span className="hidden sm:inline">Get Help</span>
-            </button>
           </div>
           <p className="text-lg text-slate-600 max-w-2xl">
             Quick checklist to optimize your workstation setup for better health and productivity.
