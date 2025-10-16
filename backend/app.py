@@ -21,7 +21,7 @@ logger = logging.getLogger("uvicorn.error")
 
 # Logger setup
 
-logger = logging.getLogger("officeease")
+logger = logging.getLogger("officeEz")
 logger.setLevel(logging.INFO)
 
 # --- Model assets (paths can be overridden via env) ---
@@ -37,13 +37,13 @@ except Exception as e:
     raise
 
 # FastAPI + CORS
-app = FastAPI(title="OfficeEase Backend", version="2.0.0")
+app = FastAPI(title="OfficeEz Backend", version="2.0.0")
 
 
 
 allowed_origins = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:3000,https://v2-it2-officeez.vercel.app"
+    "http://localhost:3000,https://v2-it2-officeez.vercel.app,https://OfficeEz-it3-final.vercel.app"
 ).split(",")
 
 app.add_middleware(
@@ -93,7 +93,7 @@ def peek_table(
 def stress_suggestion(db: Session = Depends(get_db)):
     row = db.execute(text("""
         SELECT id, site_name, suggestion_name, steps, site_link
-        FROM OfficeEase.it2_stress_relief_suggestions
+        FROM OfficeEz.it2_stress_relief_suggestions
         ORDER BY RAND() LIMIT 1
     """)).mappings().first()
     if not row:
@@ -105,7 +105,7 @@ def stretch_random_set(db: Session = Depends(get_db)):
     try:
         pick = db.execute(text("""
             SELECT site_number
-            FROM OfficeEase.it2_stretch_challenge
+            FROM OfficeEz.it2_stretch_challenge
             GROUP BY site_number
             ORDER BY RAND()
             LIMIT 1
@@ -116,7 +116,7 @@ def stretch_random_set(db: Session = Depends(get_db)):
         site_number = pick[0]
         rows = db.execute(text("""
             SELECT site_name, area_name, steps, site_link, site_number
-            FROM OfficeEase.it2_stretch_challenge
+            FROM OfficeEz.it2_stretch_challenge
             WHERE site_number = :sn
             ORDER BY area_name
         """), {"sn": site_number}).mappings().all()
@@ -138,7 +138,7 @@ def get_activity_guidelines(db: Session = Depends(get_db)):
                percent_five_or_more_days_active,
                percent_strength_toning_two_days,
                survey_year
-        FROM OfficeEase.it2_physical_guidelines
+        FROM OfficeEz.it2_physical_guidelines
         WHERE survey_year = 2022
         ORDER BY age_group
     """)).mappings().all()
@@ -154,7 +154,7 @@ def get_guidelines(db: Session = Depends(get_db)):
     rows = db.execute(text("""
         SELECT age_group, percent_mostly_sitting, percent_mostly_standing,
                percent_mostly_walking, percent_physically_demanding, survey_year
-        FROM OfficeEase.it2_workday_activity
+        FROM OfficeEz.it2_workday_activity
         WHERE survey_year = 2022
         ORDER BY age_group
     """)).mappings().all()
@@ -169,23 +169,24 @@ def get_guidelines(db: Session = Depends(get_db)):
 @app.get("/connection-scores")
 def connection_scores(db: Session = Depends(get_db)):
     rows = db.execute(text("""
-        SELECT id, question, Daily, Weekly, Monthly, Rarely, Never,
-               Strongly_agree, Agree, Neutral, Disagree,
-               Yes, No, Unsure, Sometimes, Often, Always,
-               official_benchmark, mapping_logic, source, source_link
-        FROM OfficeEase.it3_connection_score_table
-        ORDER BY id ASC
+        SELECT id, question, answer_options
+        FROM OfficeEz.it3_connection_score_table
+        ORDER BY RAND()
+        LIMIT 10;
     """)).mappings().all()
+
     if not rows:
-        raise HTTPException(404, "No connection scores found")
+        raise HTTPException(status_code=404, detail="No connection scores found")
+
     return [dict(r) for r in rows]
+
 
 #  Loneliness Trend
 @app.get("/loneliness-trend")
 def loneliness_trend(db: Session = Depends(get_db)):
     rows = db.execute(text("""
         SELECT year, loneliness_percent
-        FROM OfficeEase.it3_loneliness_trend
+        FROM OfficeEz.it3_loneliness_trend
         ORDER BY year ASC
     """)).mappings().all()
     if not rows:
@@ -197,7 +198,7 @@ def loneliness_trend(db: Session = Depends(get_db)):
 def connection_bands(db: Session = Depends(get_db)):
     rows = db.execute(text("""
         SELECT id, total_score_range, connection_band
-        FROM OfficeEase.it3_score_calculation_table
+        FROM OfficeEz.it3_score_calculation_table
         ORDER BY id ASC
     """)).mappings().all()
     return [dict(r) for r in rows]
@@ -207,7 +208,7 @@ def connection_bands(db: Session = Depends(get_db)):
 def social_insights(db: Session = Depends(get_db)):
     rows = db.execute(text("""
         SELECT Source_Table, Metric, Sex, Age_group, Year, Value
-        FROM OfficeEase.it3_social_connection_insights
+        FROM OfficeEz.it3_social_connection_insights
         ORDER BY Year DESC, Metric
     """)).mappings().all()
     if not rows:
@@ -219,7 +220,7 @@ def social_insights(db: Session = Depends(get_db)):
 def volunteering_trend(db: Session = Depends(get_db)):
     rows = db.execute(text("""
         SELECT year, voluntary_work_through_an_organisation, informal_volunteering
-        FROM OfficeEase.it3_volunteering_trend
+        FROM OfficeEz.it3_volunteering_trend
         ORDER BY year ASC
     """)).mappings().all()
     if not rows:
@@ -240,7 +241,7 @@ def social_contact_trend(db: Session = Depends(get_db)):
     try:
         rows = db.execute(text("""
             SELECT Year, Age_group, AVG(Value) AS Value
-            FROM OfficeEase.it3_social_connection_insights
+            FROM OfficeEz.it3_social_connection_insights
             WHERE Metric = 'Average_social_contact'
               AND Sex = 'All'
             GROUP BY Year, Age_group
