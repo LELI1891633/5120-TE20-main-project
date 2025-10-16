@@ -281,12 +281,7 @@ function ParticleTrailGame() {
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className="w-full cursor-crosshair bg-gradient-to-b from-sky-100 to-blue-100 touch-none"
-            style={{ 
-              height: '400px',
-              display: 'block',
-              width: '100%'
-            }}
+            className="w-full cursor-crosshair bg-gradient-to-b from-sky-100 to-blue-100 touch-none block h-[50vh] min-h-[300px] max-h-[520px]"
           />
         </div>
 

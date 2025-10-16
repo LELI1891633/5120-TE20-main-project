@@ -4,7 +4,6 @@ import {
   Calendar, 
   Clock, 
   Download, 
-  RefreshCw, 
   Plus, 
   Trash2, 
   ArrowLeft,
@@ -43,16 +42,14 @@ const DailyPlanner = () => {
     stretch: true,
     outdoor: true
   });
-  const [generatedPlanner, setGeneratedPlanner] = useState(null);
+  
   // Deadlines (daily) — simple list similar to monthly needs
   const [deadlines, setDeadlines] = useState([]);
   const [dlTitle, setDlTitle] = useState("");
   const [dlTime, setDlTime] = useState("13:00");
   const [dlOwner, setDlOwner] = useState("");
   const plannerRef = useRef(null);
-  // Schedule grid (06:00–21:00) & notes/inbox adopted from template
-  const hours = Array.from({ length: 16 }, (_, i) => 6 + i);
-  const [schedule, setSchedule] = useState({});
+  // Removed schedule grid; time is now per-task
   const [notes, setNotes] = useState("");
   const [inboxText, setInboxText] = useState("");
   const [inbox, setInbox] = useState([]);
@@ -82,10 +79,12 @@ const DailyPlanner = () => {
     ],
   };
   const [theme, setTheme] = useState("focus");
-  const themeFact = (() => {
+  const themeFact = React.useMemo(() => {
     const arr = facts[theme] || [];
-    return arr.length ? arr[Math.floor(Math.random() * arr.length)] : "";
-  })();
+    if (!arr.length) return "";
+    // Stable display: use the first entry for the selected theme
+    return arr[0];
+  }, [theme]);
   const [gratColleague, setGratColleague] = useState("");
   const [gratTool, setGratTool] = useState("");
   const [gratWin, setGratWin] = useState("");
@@ -105,100 +104,9 @@ const DailyPlanner = () => {
 
   const removeTask = (index) => setTasks(tasks.filter((_, i) => i !== index));
 
-  const generatePlanner = () => {
-    const today = new Date();
-    const dateString = today.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+  
 
-    const planner = {
-      date: dateString,
-      workHours: `${workStart} - ${workEnd}`,
-      tasks: tasks.map((t) => (typeof t === "string" ? t : t.text)),
-      breaks: [
-        { time: "10:30", duration: breakDuration, type: "Morning Break" },
-        { time: "14:00", duration: breakDuration, type: "Afternoon Break" }
-      ],
-      wellbeing: [
-        { time: "10:00", prompt: "Stay hydrated! Drink a glass of water", icon: "💧", enabled: wellbeingPrompts.hydration },
-        { time: "11:30", prompt: "Take a quick stretch break", icon: "🧘‍♀️", enabled: wellbeingPrompts.stretch },
-        { time: "15:00", prompt: "Get some fresh air and sunlight", icon: "🌞", enabled: wellbeingPrompts.outdoor }
-      ].filter(item => item.enabled)
-    };
-
-    setGeneratedPlanner(planner);
-  };
-
-  const downloadPDF = () => {
-    if (!generatedPlanner) return;
-    
-    // Create a simple HTML content for PDF
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Daily Planner - ${generatedPlanner.date}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .section { margin-bottom: 25px; }
-          .section h3 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-          .task-list { list-style-type: none; padding: 0; }
-          .task-list li { padding: 5px 0; }
-          .break-item, .wellbeing-item { margin: 8px 0; padding: 8px; background: #f9f9f9; border-radius: 4px; }
-          .time { font-weight: bold; color: #666; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>📅 Daily Planner</h1>
-          <h2>${generatedPlanner.date}</h2>
-          <p>Work Hours: ${generatedPlanner.workHours}</p>
-        </div>
-        
-        <div class="section">
-          <h3>📋 Today's Tasks</h3>
-          <ul class="task-list">
-            ${generatedPlanner.tasks.map(task => `<li>• ${task}</li>`).join('')}
-          </ul>
-        </div>
-        
-        <div class="section">
-          <h3>☕ Break Times</h3>
-          ${generatedPlanner.breaks.map(breakItem => 
-            `<div class="break-item">
-              <span class="time">${breakItem.time}</span> - ${breakItem.type} (${breakItem.duration} min)
-            </div>`
-          ).join('')}
-        </div>
-        
-        <div class="section">
-          <h3>💧 Wellbeing Reminders</h3>
-          ${generatedPlanner.wellbeing.map(item => 
-            `<div class="wellbeing-item">
-              <span class="time">${item.time}</span> ${item.icon} ${item.prompt}
-            </div>`
-          ).join('')}
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Create and download the file
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `daily-planner-${new Date().toISOString().split('T')[0]}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  
 
   const handlePrint = () => {
     window.print();
@@ -228,7 +136,10 @@ const DailyPlanner = () => {
   const sendInboxToTasks = (i) => {
     const item = inbox[i];
     if (!item) return;
-    setTasks((arr) => [item, ...arr]);
+    setTasks((arr) => [
+      { text: item, done: false },
+      ...arr,
+    ]);
     setInbox((arr) => arr.filter((_, idx) => idx !== i));
   };
   const addBreak = () => setBreaks((b) => [...b, ""]);
@@ -314,6 +225,21 @@ const DailyPlanner = () => {
                         {t.estimate && <span>Est: {t.estimate}</span>}
                       </div>
                     )}
+                    {/* Per-task time and block details */}
+                    <div className="pl-7 grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-3">
+                      <input
+                        type="time"
+                        value={t.time || ""}
+                        onChange={(e)=>setTasks(arr=>arr.map((v,idx)=>idx===i?{...v,time:e.target.value}:v))}
+                        className="rounded-lg border border-blue-200 px-3 py-2 bg-white"
+                      />
+                      <input
+                        placeholder="Block / Meeting / Focus Block"
+                        value={t.block || ""}
+                        onChange={(e)=>setTasks(arr=>arr.map((v,idx)=>idx===i?{...v,block:e.target.value}:v))}
+                        className="rounded-lg border border-blue-200 px-3 py-2 bg-white/90"
+                      />
+                    </div>
                   </div>
                 ))}
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -322,18 +248,6 @@ const DailyPlanner = () => {
               </div>
             </div>
 
-            {/* Schedule (with Breaks) */}
-            <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md print-only">
-              <h3 className="mb-4 text-xl font-semibold text-slate-800">Schedule (with Breaks)</h3>
-              <div className="grid grid-cols-1 divide-y">
-                {hours.map((h)=> (
-                  <div key={h} className="flex items-center gap-4 py-2">
-                    <div className="w-24 text-sm font-medium tabular-nums text-slate-700">{(h%12||12)}:00 {h>=12? 'PM':'AM'}</div>
-                    <input placeholder="Block / Meeting / Focus Block" value={schedule[h]||""} onChange={(e)=>setSchedule(s=>({...s,[h]:e.target.value}))} className="flex-1 rounded-lg border border-blue-200 px-3 py-2 bg-white/90" />
-                  </div>
-                ))}
-              </div>
-            </div>
 
             
 
@@ -374,17 +288,10 @@ const DailyPlanner = () => {
               </div>
             </div>
 
-            {/* Generate Button */}
-            <button
-              onClick={generatePlanner}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:brightness-105 hover:shadow-xl"
-            >
-              <RefreshCw size={18} />
-              Generate Planner
-            </button>
+            {/* Removed redundant Generate button */}
           </div>
 
-          {/* 右侧功能列（Mood、Notes、Gratitude、Quick Inbox、Prompts） */}
+          {/* Right column: Mood, Notes, Gratitude, Quick Inbox, Prompts */}
           <div className="space-y-6">
             {/* Mood Theme & Fact */}
             <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md print-only">
@@ -438,7 +345,7 @@ const DailyPlanner = () => {
               </ul>
             </div>
 
-            {/* Wellbeing Prompts（与图片右侧相近） */}
+            {/* Wellbeing Prompts (right-side widgets) */}
             <div className="rounded-2xl border border-white/30 bg-white/20 p-6 shadow-xl backdrop-blur-md no-print">
               <h3 className="mb-3 text-xl font-semibold text-slate-800">Wellbeing Prompts</h3>
               {/* Hydration */}
@@ -478,7 +385,7 @@ const DailyPlanner = () => {
             </div>
           </div>
         </div>
-        {/* 预览功能已取消 */}
+        {/* Preview section removed */}
         <style>{`
           @media print {
             @page { margin: 12mm; }
