@@ -351,7 +351,7 @@ const MonthlyPlanner = () => {
           </div>
 
           {/* Wellbeing Goals */}
-          <div className="rounded-2xl border border-white/30 bg-white/20 shadow-xl backdrop-blur-md">
+          <div className="rounded-2xl border border-white/30 bg-white/20 shadow-xl backdrop-blur-md no-print">
             <div className="p-4">
               <div className="flex items-center gap-2 text-slate-700 font-semibold mb-2"><HeartPulse className="h-5 w-5"/> Wellbeing Goals</div>
               <div className="space-y-3">
@@ -391,7 +391,7 @@ const MonthlyPlanner = () => {
             .backdrop-blur-md { backdrop-filter: none !important; }
             /* Flatten card backgrounds to white */
             .print-mono * { background: white !important; }
-            /* Borders remain淡灰，文本黑白 */
+            /* Keep borders light grey and text monochrome */
             * { color: #111 !important; -webkit-print-color-adjust: economy; print-color-adjust: economy; }
           }
         `}</style>

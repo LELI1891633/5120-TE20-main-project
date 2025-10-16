@@ -6,7 +6,6 @@ export default function BubblePopGame() {
   const navigate = useNavigate();
   const COLS = 7;
   const size = COLS * COLS;
-  const BUBBLE = 56;
 
   const [popped, setPopped] = useState(() => Array(size).fill(false));
 
@@ -63,17 +62,13 @@ export default function BubblePopGame() {
           <h1 className="text-2xl font-semibold">Bubble Pop</h1>
         </div>
 
-        <div className="rounded-3xl border border-white/40 bg-white/70 p-6 shadow-xl backdrop-blur-md overflow-x-auto">
-          <div
-            className="grid gap-3 w-fit mx-auto"
-            style={{ gridTemplateColumns: `repeat(${COLS}, ${BUBBLE}px)` }}
-          >
+        <div className="rounded-3xl border border-white/40 bg-white/70 p-6 shadow-xl backdrop-blur-md">
+          <div className="grid grid-cols-7 sm:grid-cols-7 gap-3 w-full max-w-[420px] mx-auto">
             {popped.map((isPopped, i) => (
               <button
                 key={i}
                 onClick={() => pop(i)}
-                style={{ width: BUBBLE, height: BUBBLE }}
-                className={`rounded-full transition-all duration-150 ${
+                className={`aspect-square w-full rounded-full transition-all duration-150 ${
                   isPopped
                     ? "scale-90 bg-slate-200 cursor-default"
                     : "bg-gradient-to-br from-cyan-200 to-sky-200 hover:from-cyan-300 hover:to-sky-300 active:scale-95"

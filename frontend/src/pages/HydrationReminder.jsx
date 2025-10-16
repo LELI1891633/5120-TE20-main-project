@@ -269,13 +269,19 @@ export default function HydrationReminder() {
     };
   }, [enabled, nextAt, fireReminder, scheduleNext]);
 
-  // Input validation functions
+  // Input validation helpers
   const validateInterval = (value) => {
     const num = Number(value);
     if (isNaN(num) || num < 15 || num > 1440) { // 15 minutes to 24 hours
-      return 120; // default to 2 hours
+      return 120; // default to 2 hours when we must coerce (e.g., loading/saving)
     }
-    return Math.round(num / 15) * 15; // round to nearest 15 minutes
+    return Math.round(num); // store as integer minutes without step constraint
+  };
+
+  const isValidIntervalExact = (value) => {
+    const num = Number(value);
+    if (isNaN(num)) return false;
+    return num >= 15 && num <= 1440; // only range validation
   };
 
   const validateHour = (value) => {
@@ -293,30 +299,32 @@ export default function HydrationReminder() {
       setRawIntervalInput('');
       return;
     }
-    // Check if it's a valid number and not exceeding max
+    // Validate numeric range as user types; disallow negatives
     const num = Number(value);
-    if (!isNaN(num) && num <= 1440) {
+    if (!isNaN(num) && num >= 0 && num <= 1440) {
       setRawIntervalInput(value);
     }
-    // If it exceeds 1440, don't update the input
+    // If out of range, ignore keystroke (keep last valid value)
   };
 
   const handleIntervalBlur = () => {
     const value = rawIntervalInput;
     if (value === '') {
+      // Keep previous behavior for empty: reset to safe default
       setIntervalMins(120);
       setRawIntervalInput("120");
       setInputErrors(prev => ({ ...prev, interval: null }));
       return;
     }
-    const num = Number(value);
-    if (isNaN(num) || num < 15 || num > 1440) {
+    // Require range only; do not auto-correct
+    if (!isValidIntervalExact(value)) {
       setInputErrors(prev => ({ ...prev, interval: 'Please enter a value between 15 and 1440 minutes' }));
       return;
     }
-    const validated = validateInterval(value);
-    setIntervalMins(validated);
-    setRawIntervalInput(validated.toString());
+    const num = Number(value);
+    const intNum = Math.round(num);
+    setIntervalMins(intNum);
+    setRawIntervalInput(intNum.toString());
     setInputErrors(prev => ({ ...prev, interval: null }));
   };
 
@@ -483,7 +491,7 @@ export default function HydrationReminder() {
                 type="number"
                 min={15}
                 max={1440}
-                step={15}
+                step={1}
                 value={rawIntervalInput}
                 onChange={handleIntervalChange}
                 onBlur={handleIntervalBlur}
@@ -654,10 +662,11 @@ export default function HydrationReminder() {
 
           <div className="space-y-3">
             <button
-              onClick={() => setEnabled((v) => !v)}
+              onClick={() => { if (!inputErrors.interval && !inputErrors.officeStart && !inputErrors.officeEnd) { setEnabled((v) => !v); } }}
+              disabled={Boolean(inputErrors.interval || inputErrors.officeStart || inputErrors.officeEnd)}
               className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-white font-medium ${
                 enabled ? "bg-rose-600 hover:bg-rose-700" : "bg-sky-600 hover:bg-sky-700"
-              } transition-colors`}
+              } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {enabled ? (
                 <>

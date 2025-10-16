@@ -44,7 +44,6 @@ function WhackBoard() {
   const GRID = 4;
   const CELLS = GRID * GRID;
   const ROUND_SECONDS = 30;
-  const CELL = 90;
   const INITIAL_SPEED_MS = 1200;
   const MIN_SPEED_MS = 700;
 
@@ -128,24 +127,22 @@ function WhackBoard() {
         </div>
       </div>
 
-      {/* Board */}
+      {/* Board - responsive grid fits small screens */}
       <div
-        className="grid gap-3 w-fit mx-auto"
-        style={{ gridTemplateColumns: `repeat(${GRID}, ${CELL}px)` }}
+        className="grid grid-cols-4 gap-3 w-full max-w-[420px] mx-auto"
       >
         {Array.from({ length: CELLS }).map((_, i) => (
           <button
             key={i}
             onClick={() => hit(i)}
-            className="relative rounded-2xl bg-white/70 ring-1 ring-slate-200 shadow-inner hover:bg-white transition-colors"
-            style={{ width: CELL, height: CELL }}
+            className="relative rounded-2xl bg-white/70 ring-1 ring-slate-200 shadow-inner hover:bg-white transition-colors aspect-square w-full"
           >
             <div
               className={`absolute inset-0 grid place-items-center transition-transform duration-200 ${
                 i === active ? "scale-100 translate-y-0" : "scale-0 translate-y-6"
               }`}
             >
-              <Cube3D fullSize />
+              <Cube3D />
             </div>
           </button>
         ))}
@@ -188,7 +185,7 @@ function WhackBoard() {
 
 function Cube3D() {
   return (
-    <div className="relative w-[70px] h-[70px] rounded-lg bg-gradient-to-br from-rose-400 to-pink-600 shadow-[inset_0_3px_5px_rgba(255,255,255,0.5),0_6px_12px_rgba(0,0,0,0.25)] transition-all duration-200 hover:brightness-110">
+    <div className="relative w-[70%] h-[70%] max-w-[70px] max-h-[70px] min-w-[44px] min-h-[44px] rounded-lg bg-gradient-to-br from-rose-400 to-pink-600 shadow-[inset_0_3px_5px_rgba(255,255,255,0.5),0_6px_12px_rgba(0,0,0,0.25)] transition-all duration-200 hover:brightness-110">
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/25 to-transparent rounded-lg"></div>
       <div className="absolute bottom-0 left-0 w-full h-2 bg-black/20 rounded-b-lg"></div>
     </div>
