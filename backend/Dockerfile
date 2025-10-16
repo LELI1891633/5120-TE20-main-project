@@ -1,6 +1,6 @@
 
 # ==========================================
-# OfficeEz Backend - AWS Lambda Container
+# OfficeEz Backend AWS Lambda Container
 # ==========================================
 
 FROM public.ecr.aws/lambda/python:3.11
