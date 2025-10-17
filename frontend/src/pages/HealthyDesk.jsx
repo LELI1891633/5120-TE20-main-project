@@ -51,6 +51,8 @@ const HealthyDesk = () => {
   const [loadingStep, setLoadingStep] = useState(0);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [assistantOpen, setAssistantOpen] = useState(true);
+  const [inputErrors, setInputErrors] = useState({});
+  const [rawHeight, setRawHeight] = useState(String(initialForm.heightCm));
 
   /* ------------------------------------------------------------------------
    * Field helpers
@@ -106,11 +108,42 @@ const HealthyDesk = () => {
 
   const handleReset = () => {
     setForm(initialForm);
+    setRawHeight(String(initialForm.heightCm));
+    setInputErrors({});
     setSubmitted(false);
     setLoading(false);
     setLoadingStep(0);
     setAnalysisResult(null);
   };
+
+  // Height field validation (mobile-friendly)
+  const handleHeightChange = (e) => {
+    const v = e.target.value;
+    if (v === '') { setRawHeight(''); return; }
+    // Allow typing only digits and up to 3 chars
+    if (/^\d{0,3}$/.test(v)) {
+      setRawHeight(v);
+    }
+  };
+  const handleHeightBlur = () => {
+    const v = rawHeight;
+    if (v === '') {
+      setRawHeight(String(initialForm.heightCm));
+      setForm((f)=>({ ...f, heightCm: initialForm.heightCm }));
+      setInputErrors(prev=>({ ...prev, height: null }));
+      return;
+    }
+    const num = Number(v);
+    if (isNaN(num) || num < 120 || num > 220) {
+      setInputErrors(prev=>({ ...prev, height: 'Please enter a value between 120 and 220 cm' }));
+      return;
+    }
+    const rounded = Math.round(num);
+    setForm((f)=>({ ...f, heightCm: rounded }));
+    setRawHeight(String(rounded));
+    setInputErrors(prev=>({ ...prev, height: null }));
+  };
+  const handleHeightFocus = () => setInputErrors(prev=>({ ...prev, height: null }));
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-sky-50 py-6 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -140,13 +173,6 @@ const HealthyDesk = () => {
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold text-slate-800">Healthy Desk</h1>
             </div>
-            <button
-              onClick={() => setAssistantOpen(true)}
-              className="flex items-center gap-2 bg-sky-100 hover:bg-sky-200 text-sky-700 px-4 py-2 rounded-lg transition-colors duration-200"
-            >
-              <Info size={18} />
-              <span className="hidden sm:inline">Get Help</span>
-            </button>
           </div>
           <p className="text-lg text-slate-600 max-w-2xl">
             Quick checklist to optimize your workstation setup for better health and productivity.
@@ -237,11 +263,20 @@ const HealthyDesk = () => {
                   type="number"
                   min="120"
                   max="220"
-                  value={form.heightCm}
-                  onChange={onNumber("heightCm")}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-colors"
+                  step="1"
+                  inputMode="numeric"
+                  value={rawHeight}
+                  onChange={handleHeightChange}
+                  onBlur={handleHeightBlur}
+                  onFocus={handleHeightFocus}
+                  className={`w-full px-4 py-3 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-colors ${inputErrors.height ? 'border-red-300 bg-red-50' : 'border-slate-200'}`}
                   aria-label="Your height in centimeters"
                 />
+                <div className="h-5 mt-1 text-xs text-slate-500">
+                  {inputErrors.height && (
+                    <div className="flex items-center gap-1 text-red-600"><AlertTriangle size={12}/>{inputErrors.height}</div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -357,7 +392,7 @@ const HealthyDesk = () => {
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <button 
                 type="submit" 
-                disabled={loading}
+                disabled={loading || Boolean(inputErrors.height)}
                 className="flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200"
               >
                 <CheckCircle size={18} />

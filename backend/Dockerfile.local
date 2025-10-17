@@ -1,5 +1,5 @@
 # ==============================
-# OfficeEase Backend Dockerfile
+# OfficeEZ Backend Dockerfile
 # ==============================
 
 # 1. Use lightweight Python image

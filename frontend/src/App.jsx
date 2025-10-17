@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchBreaks, fetchStressSuggestion } from "./client";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import LandingPage from "./components/LandingPage";
@@ -25,6 +25,9 @@ import DailyPlanner from "./pages/DailyPlanner";
 import MonthlyPlanner from "./pages/MonthlyPlanner";
 import MonthlyWellbeing from "./pages/MonthlyWellbeing";
 import PlannerHub from "./pages/PlannerHub";
+import Login from "./pages/Login";
+
+const AUTH_KEY = "auth.te20.session";
 
 // Scroll to top component
 function ScrollToTop() {
@@ -47,7 +50,15 @@ function ScrollToTop() {
 }
 
 function App() {
+  const [authed, setAuthed] = useState(() => {
+    try { return sessionStorage.getItem(AUTH_KEY) === "1"; } catch { return false; }
+  });
 
+  useEffect(() => {
+    const onLogin = () => setAuthed(true);
+    window.addEventListener("auth:login", onLogin);
+    return () => window.removeEventListener("auth:login", onLogin);
+  }, []);
 
     const [testBreaks, setTestBreaks] = useState([]);
   const [testSuggestion, setTestSuggestion] = useState(null);
@@ -108,6 +119,12 @@ function App() {
             onSnooze={handleSnooze}
           />
           <Routes>
+            <Route path="/login" element={<Login onAuthed={() => setAuthed(true)} />} />
+            {!authed && (
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            )}
+            {authed && (
+              <>
             <Route path="/" element={<LandingPage />} />
             <Route path="/healthy" element={<HealthyPage />} />
             <Route path="/healthy-desk" element={<HealthyDesk />} />
@@ -127,7 +144,9 @@ function App() {
             <Route path="/planner" element={<PlannerHub />} />
             <Route path="/daily-planner" element={<DailyPlanner />} />
             <Route path="/monthly-planner" element={<MonthlyPlanner />} />
-            <Route path="/monthly-wellbeing" element={<MonthlyWellbeing />} />
+                <Route path="/monthly-wellbeing" element={<MonthlyWellbeing />} />
+              </>
+            )}
           </Routes>
         </main>
         <Footer />
