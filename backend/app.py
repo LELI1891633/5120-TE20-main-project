@@ -43,7 +43,7 @@ app = FastAPI(title="OfficeEz Backend", version="2.0.0")
 
 allowed_origins = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:3000,https://v2-it2-officeez.vercel.app,https://OfficeEz-it3-final.vercel.app"
+    "http://localhost:3000,https://v2-it2-officeez.vercel.app,https://OfficeEz-it3-final.vercel.app,https://it3-officeez-production.vercel.app"
 ).split(",")
 
 app.add_middleware(
