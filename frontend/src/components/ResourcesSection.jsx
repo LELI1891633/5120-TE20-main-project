@@ -6,21 +6,22 @@ export default function ResourcesSection() {
   const resources = [
     {
       title: "Safe Work Australia",
-      description: "National workplace standards and ergonomics guidance.",
+      description:
+        "Australia’s national policy body for work health and safety and workers’ compensation, promoting safer, healthier, and more productive workplaces.",
       link: "https://www.safeworkaustralia.gov.au/",
       icon: <ShieldCheck className="text-blue-600" size={22} />,
     },
     {
       title: "WorkSafe Victoria",
       description:
-        "Health and safety resources for Victorian workplaces and employees.",
+        "Victoria’s workplace health and safety regulator and injury insurer — working to reduce workplace harm and improve outcomes for injured workers.",
       link: "https://www.worksafe.vic.gov.au/",
       icon: <HeartPulse className="text-pink-600" size={22} />,
     },
     {
       title: "Australian Government Health",
       description:
-        "Information about physical activity, nutrition, and mental wellbeing.",
+        "National health and aged care department focused on evidence-based policy, prevention programs, and promoting wellbeing across Australia.",
       link: "https://www.health.gov.au/",
       icon: <BookOpen className="text-green-600" size={22} />,
     },
@@ -28,9 +29,10 @@ export default function ResourcesSection() {
 
   return (
     <div className="space-y-8">
+      {/* Official Resources */}
       <ChartCard
         title="Official Health & Safety Resources"
-        subtitle="Reliable sources for workplace wellbeing and eye health"
+        subtitle="Reliable sources for workplace wellbeing and health information"
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
           {resources.map((res, i) => (
@@ -59,29 +61,46 @@ export default function ResourcesSection() {
         </div>
       </ChartCard>
 
+      {/* Why These Matter */}
       <ChartCard
         title="Why These Matter"
-        subtitle="How these resources connect to your wellbeing"
+        subtitle="How these organisations support safer, healthier workplaces"
       >
         <div className="grid md:grid-cols-2 gap-6 text-slate-700 text-sm leading-relaxed">
           <p>
-            <span className="font-semibold">Safe Work Australia</span> ensures
-            national ergonomic standards that protect you from repetitive strain
-            and posture-related risks at your workstation.
-          </p>
-          <p>
-            <span className="font-semibold">WorkSafe Victoria</span> provides
-            detailed health, safety, and compensation guidelines for Victorian
-            workplaces—ideal for understanding how to design safe office
-            spaces.
-          </p>
-          <p>
-            <span className="font-semibold">
-              Australian Government Department of Health
+            <span className="font-semibold text-slate-900">
+              Safe Work Australia
             </span>{" "}
-            gives up-to-date information on physical activity, mental health,
-            and digital wellbeing programs, ensuring you stay balanced while
-            working.
+            is the national policy body representing the Commonwealth, states,
+            territories, workers, and employers. It leads efforts to reduce
+            work-related injuries, illnesses, and fatalities through national
+            WHS and workers’ compensation policy. Each year, work-related
+            incidents cost the economy billions, Safe Work Australia’s work
+            aims to make Australian workplaces safer, healthier, and more
+            productive.
+          </p>
+
+          <p>
+            <span className="font-semibold text-slate-900">
+              WorkSafe Victoria
+            </span>{" "}
+            serves as Victoria’s health and safety regulator and workplace
+            injury insurer. It reduces workplace harm through education,
+            inspections, and enforcement, while also supporting injured workers
+            to recover and return to safe work. For over 35 years, it has
+            improved safety outcomes and maintained Victoria as one of the
+            world’s safest places to work.
+          </p>
+
+          <p className="md:col-span-2">
+            <span className="font-semibold text-slate-900">
+              Australian Government Department of Health and Aged Care
+            </span>{" "}
+            leads national programs to improve health and wellbeing for all
+            Australians. It develops evidence based policies across physical
+            health, mental wellbeing, aged care, and sport, promoting
+            preventive care, awareness, and equitable access to health services
+            to help Australians live healthier, longer lives.
           </p>
         </div>
       </ChartCard>

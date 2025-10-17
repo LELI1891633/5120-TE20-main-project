@@ -17,7 +17,6 @@ export default function SedentarySection() {
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-  // Fetch real backend data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,7 +24,6 @@ export default function SedentarySection() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        // Transform backend keys to Recharts-friendly format
         const formatted = data.map((d) => ({
           age: d.age_group,
           Sitting: d.percent_mostly_sitting,
@@ -42,7 +40,6 @@ export default function SedentarySection() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [API_BASE]);
 
@@ -59,20 +56,17 @@ export default function SedentarySection() {
   if (error) return <div className="text-red-600">Error: {error}</div>;
   if (!distributionData.length) return <div>No data available.</div>;
 
-
   return (
     <div className="flex flex-col gap-8">
-      {/* Section Header */}
+      {/* Header */}
       <div className="text-center">
-        <h2 className="text-2xl font-semibold text-slate-800 mb-1">
-          Sedentary Insights
-        </h2>
+        <h2 className="text-2xl font-semibold text-slate-800 mb-1">Sedentary Insights</h2>
         <p className="text-slate-600">
           Explore national patterns in workday activity levels.
         </p>
       </div>
 
-      {/* Scrollable Metric Cards */}
+      {/* Metric Cards */}
       <div className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide">
         {metrics.map((m) => (
           <div
@@ -87,40 +81,55 @@ export default function SedentarySection() {
             <div className="flex flex-col h-full justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-slate-800">
-                  {m.name}
+                  {m.icon} {m.name}
                 </h3>
                 <p className="text-sm text-slate-500">{m.desc}</p>
               </div>
-              <p
-                className="text-3xl font-bold mt-4"
-                style={{ color: m.color }}
-              >
-                
-              </p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Active Metric Summary */}
-      <div className="rounded-3xl bg-white/60 backdrop-blur-md border border-white/40 p-6 shadow-md">
+      {/* Chart Section */}
+      <div className="rounded-3xl bg-white/70 backdrop-blur-md border border-white/40 p-6 shadow-md">
         <h3 className="text-xl font-semibold text-slate-800 mb-3">
           {active.name} Distribution
         </h3>
-        <p className="text-slate-600 mb-6">
-          Percentage by age group for people mostly <b>{active.name.toLowerCase()}</b> during workdays.
+        <p className="text-slate-600 mb-6 leading-relaxed">
+          Percentage by age group for people mostly <b>{active.name.toLowerCase()}</b> during workdays.{" "}
+          {active.name === "Sitting" &&
+            "Younger adults show lower sitting time compared to mid-age groups, indicating more mobility in early career years."}
+          {active.name === "Standing" &&
+            "Standing tends to be more common in younger workers, gradually decreasing with age as job roles shift towards desk-based work."}
+          {active.name === "Walking" &&
+            "Walking levels are highest among younger adults and decline steadily with age, reflecting reduced active commuting and workplace mobility."}
+          {active.name === "Physically Demanding" &&
+            "Physically demanding activities are concentrated among younger groups, with a sharp decline after age 35, reflecting occupational transitions."}
         </p>
 
-        {/* Modern Bar Chart instead of Pie */}
+        {/* Bar Chart */}
         <div className="w-full h-72">
           <ResponsiveContainer>
             <BarChart
               data={distributionData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 30, left: 40, bottom: 30 }} // adds space near Y-axis
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="age" tick={{ fill: "#475569", fontSize: 12 }} />
-              <YAxis tick={{ fill: "#475569", fontSize: 12 }} />
+              <XAxis
+                dataKey="age"
+                tick={{ fill: "#475569", fontSize: 12 }}
+                label={{ value: "Age Group", position: "insideBottom", offset: -10 }}
+              />
+              <YAxis
+                tick={{ fill: "#475569", fontSize: 12 }}
+                label={{
+                  value: "Percentage (%)",
+                  angle: -90,
+                  position: "insideLeft",
+                  offset: -5,
+                  dy: 40, // moves label down slightly for alignment
+                }}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "white",
@@ -141,4 +150,3 @@ export default function SedentarySection() {
     </div>
   );
 }
-
