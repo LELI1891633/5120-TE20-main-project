@@ -59,7 +59,7 @@ const PlannerHub = () => {
         {/* Header */}
         <div className="mb-12">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="mb-6 inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/20 px-4 py-2 font-medium text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/30 hover:shadow-md"
           >
             <ArrowLeft size={16} />
